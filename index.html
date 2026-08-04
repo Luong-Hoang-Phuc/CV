@@ -6,7 +6,7 @@
     <title>Portfolio Số - Công Nghệ Kỹ Thuật In</title>
     <!-- Thư viện Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Thư viện html2pdf.js chuyên xuất PDF giữ hyperlink -->
+    <!-- Thư viện html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -23,9 +23,9 @@
 
         body { 
             background-color: var(--bg-color); 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
             margin: 0; 
-            padding: 20px; 
+            padding: 15px; 
             color: var(--text-color); 
             transition: background-color 0.3s;
             min-height: 100vh;
@@ -33,17 +33,18 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            -webkit-font-smoothing: antialiased;
         }
 
         .main-wrapper {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1050px;
             margin: 0 auto;
         }
 
         .action-bar {
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: flex-end;
         }
@@ -52,21 +53,28 @@
             background-color: #ff4757;
             color: #fff;
             border: none;
-            padding: 10px 20px;
-            font-size: 14px;
+            padding: 8px 16px;
+            font-size: 13px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            gap: 6px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
             transition: all 0.2s ease;
         }
 
         .btn-pdf:hover {
             background-color: #ff6b81;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+        }
+
+        /* Khung nội dung PDF */
+        #pdfContent {
+            background-color: var(--bg-color);
+            padding: 10px;
+            border-radius: 12px;
         }
 
         .header-container { 
@@ -74,109 +82,113 @@
             justify-content: space-between; 
             align-items: center; 
             width: 100%; 
-            margin-bottom: 18px; 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(12px);
-            padding: 18px 25px; 
-            border-radius: 16px; 
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 12px; 
+            background: rgba(255, 255, 255, 0.96); 
+            padding: 14px 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
 
-        .profile-section { display: flex; flex-direction: column; align-items: center; width: 170px; text-align: center; }
+        .profile-section { display: flex; flex-direction: column; align-items: center; width: 150px; text-align: center; }
         
         .avatar-circle { 
-            width: 100px; 
-            height: 100px; 
+            width: 85px; 
+            height: 85px; 
             background-color: #5b5b5b; 
             border-radius: 50%; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             color: #fff; 
-            font-size: 20px; 
+            font-size: 18px; 
             font-weight: bold;
-            margin-bottom: 8px; 
+            margin-bottom: 6px; 
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border: 3px solid #fff;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            border: 2px solid #fff;
         }
 
         .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-name { font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
+        .profile-name { font-size: 13.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
         
         .info-section { 
             flex-grow: 1; 
             margin-left: 20px; 
-            font-size: 13.5px; 
-            line-height: 1.5; 
+            font-size: 12.5px; 
+            line-height: 1.45; 
             font-weight: 600; 
             color: #111;
             word-break: break-word;
         }
         .info-section p { margin: 2px 0; }
         
+        /* Grid 3 cột x 2 hàng - Đảm bảo các hàng cao bằng nhau */
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
-            gap: 12px; 
+            gap: 10px; 
             width: 100%; 
+            grid-auto-rows: 1fr;
         }
 
         .section-card {
             background-color: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            height: 100%;
         }
 
         .section-banner {
             background-color: var(--banner-bg);
             color: #000000;
-            padding: 8px 14px;
-            font-size: 15px;
+            padding: 7px 12px;
+            font-size: 13.5px;
             font-weight: 900;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
 
         .section-body {
-            padding: 12px;
-            font-size: 12.5px;
-            line-height: 1.45;
+            padding: 10px;
+            font-size: 11.5px;
+            line-height: 1.4;
             color: #111;
             flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .section-body ul { padding-left: 15px; margin: 0; }
-        .media-box { margin-top: 6px; padding: 6px; background: rgba(255, 255, 255, 0.7); border-radius: 6px; }
-        .link-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .section-body ul { padding-left: 14px; margin: 0; }
+        .media-box { margin-top: 6px; padding: 5px; background: rgba(255, 255, 255, 0.75); border-radius: 6px; }
+        .link-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
         
         .btn-link-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
+            gap: 4px;
+            padding: 4px 8px;
             background: #0f9d58;
             color: #ffffff !important;
             text-decoration: none !important;
-            border-radius: 5px;
+            border-radius: 4px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.15s ease;
         }
 
         .btn-link-badge:hover {
             background: #0b8043;
-            transform: translateY(-1px);
         }
 
-        .video-container { margin-top: 6px; width: 100%; aspect-ratio: 16 / 9; }
-        .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 5px; border: none; }
+        .video-container { margin-top: 4px; width: 100%; aspect-ratio: 16 / 9; }
+        .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 4px; border: none; }
 
         @media (max-width: 900px) {
             .grid-container { grid-template-columns: repeat(2, 1fr); }
@@ -185,10 +197,9 @@
         @media (max-width: 600px) {
             .grid-container { grid-template-columns: 1fr; }
             .header-container { flex-direction: column; text-align: center; }
-            .info-section { margin-left: 0; margin-top: 12px; }
+            .info-section { margin-left: 0; margin-top: 10px; }
         }
 
-        /* Tối ưu hóa khi in/xuất PDF */
         @media print {
             .no-print { display: none !important; }
             body { padding: 0 !important; margin: 0 !important; background-color: var(--bg-color) !important; }
@@ -369,7 +380,7 @@
         };
     </script>
 
-    <!-- Kịch bản xuất PDF chính xác giữ nguyên Hyperlink -->
+    <!-- Kịch bản xuất PDF chất lượng cao, không vỡ nét -->
     <script>
         function exportToPDF() {
             const element = document.getElementById('pdfContent');
@@ -380,12 +391,18 @@
             btn.disabled = true;
 
             const opt = {
-                margin:       [5, 5, 5, 5],
+                margin:       [4, 4, 4, 4],
                 filename:     'Portfolio_LuongHoangPhuc.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { 
+                    scale: 3,             // Tăng độ nét cực cao chống bể hình/chữ
+                    useCORS: true, 
+                    logging: false,
+                    letterRendering: true,
+                    windowWidth: 1050     // Cố định độ rộng viewport chụp ảnh
+                },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                enableLinks:  true // QUAN TRỌNG: Giữ nguyên link clickable trong file PDF
+                enableLinks:  true
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
