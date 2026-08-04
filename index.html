@@ -21,14 +21,12 @@
             transition: background-color 0.3s;
         }
 
-        /* KHUNG MỜ DƯỚI AVATAR & THÔNG TIN (GLASSMORPHISM) */
         .header-container { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             max-width: 1100px; 
             margin: 0 auto 40px auto; 
-            
             background: rgba(255, 255, 255, 0.85); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -64,7 +62,6 @@
         .info-section { flex-grow: 1; margin-left: 40px; font-size: 17px; line-height: 1.8; font-weight: 600; color: #111; }
         .info-section p { margin: 6px 0; }
         
-        /* GRID 6 NÚT CHIA ĐỀU 2 CỘT (2 COLUMNS) */
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
@@ -88,7 +85,6 @@
         }
         .btn-capsule:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
 
-        /* KHUNG MODAL NỔI */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;
@@ -140,7 +136,6 @@
 </head>
 <body>
 
-    <!-- KHU VỰC HEADER VỚI NỀN KHUNG MỜ DỄ QUAN SÁT -->
     <div class="header-container">
         <div class="profile-section">
             <div class="avatar-circle" id="avatarDisplay">Avatar</div>
@@ -156,33 +151,43 @@
         </div>
     </div>
 
-    <!-- KHU VỰC GRID 6 NÚT NỘI DUNG (HIỂN THỊ CÂN BẰNG 2 CỘT) -->
     <div class="grid-container">
         <button class="btn-capsule" onclick="openModal('gioi-thieu')">1. Giới thiệu</button>
         <button class="btn-capsule" onclick="openModal('mang-xa-hoi')">2. Mạng xã hội & Liên hệ</button>
-        
         <button class="btn-capsule" onclick="openModal('ky-nang')">3. Kỹ năng chuyên môn</button>
         <button class="btn-capsule" onclick="openModal('chung-chi')">4. Chứng chỉ & Khóa học</button>
-        
         <button class="btn-capsule" onclick="openModal('kinh-nghiem')">5. Kinh nghiệm thực tập</button>
         <button class="btn-capsule" onclick="openModal('du-an')">6. Dự án tiêu biểu</button>
     </div>
 
-    <!-- KHUNG MODAL HIỂN THỊ NỘI DUNG CHI TIẾT -->
     <div class="modal-overlay" id="myModal" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">Tiêu đề</h2>
                 <button class="close-btn" onclick="closeModal(event)">&times;</button>
             </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Nội dung sẽ được đổ bằng JavaScript -->
-            </div>
+            <div class="modal-body" id="modalBody"></div>
         </div>
     </div>
 
-    <!-- MÃ JAVASCRIPT XỬ LÝ ĐỌC & TỰ ĐỘNG CẬP NHẬT DỮ LIỆU -->
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBQG-sillO8bUFeYPNam0id7KrJ_NaBpyo",
+          authDomain: "cv-luong-hoang-phuc.firebaseapp.com",
+          databaseURL: "https://cv-luong-hoang-phuc-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "cv-luong-hoang-phuc",
+          storageBucket: "cv-luong-hoang-phuc.firebasestorage.app",
+          messagingSenderId: "278907045649",
+          appId: "1:278907045649:web:2221db3506973baccd6eb0",
+          measurementId: "G-3HYL9FLGN2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         const defaultPortfolioData = {
             'gioi-thieu': {
                 title: "1. Giới thiệu",
@@ -192,7 +197,6 @@
                         <li><strong>Kiến thức nền tảng:</strong> Hiểu biết tốt về các công nghệ in Offset, Flexo, KTS, Lụa, Ống đồng và cả 3 giai đoạn (Chế bản &rarr; In &rarr; Thành phẩm).</li>
                         <li><strong>Kinh nghiệm thực tế:</strong> Đã hoàn thành 2 kỳ thực tập chuyên ngành.</li>
                         <li><strong>Đồ án đã thực hiện:</strong> Thiết kế cấu trúc, Trình bày ấn phẩm, Chế bản, Thành phẩm...</li>
-                        <li><strong>Mục tiêu:</strong> Mong muốn được trải nghiệm và thực hành thực tế tại <strong>Anh Khoa's Brother Company Limited</strong>.</li>
                     </ul>
                 `
             },
@@ -206,11 +210,11 @@
             },
             'chung-chi': {
                 title: "4. Chứng chỉ & Khóa học",
-                content: "<ul><li>Chứng chỉ Quản lý Màu G7 (G7 Expert - cơ bản).</li><li>Chứng nhận An toàn Lao động & Môi trường (2026).</li><li>Khóa học Xử lý file Preflight PDF/X.</li></ul>"
+                content: "<ul><li>Chứng chỉ Quản lý Màu G7 (G7 Expert - cơ bản).</li><li>Chứng nhận An toàn Lao động & Môi trường.</li><li>Khóa học Xử lý file Preflight PDF/X.</li></ul>"
             },
             'kinh-nghiem': {
                 title: "5. Kinh nghiệm thực tập",
-                content: "<strong>Công ty Bao bì X (01/2026 - 04/2026)</strong><br>Vị trí: Thực tập sinh QC & Quản lý màu.<br>Thực hiện kiểm tra bài in, đo đạc thông số màu sắc, và báo cáo dữ liệu định kỳ."
+                content: "<strong>Công ty Bao bì X</strong><br>Vị trí: Thực tập sinh QC & Quản lý màu.<br>Thực hiện kiểm tra bài in, đo đạc thông số màu sắc, và báo cáo dữ liệu định kỳ."
             },
             'du-an': {
                 title: "6. Dự án tiêu biểu (Mô hình CAR)",
@@ -220,11 +224,10 @@
 
         let currentPortfolioData = defaultPortfolioData;
 
-        function loadDataFromStorage() {
-            const saved = localStorage.getItem('myPortfolioData');
-            if (!saved) return;
-            try {
-                const parsed = JSON.parse(saved);
+        function listenRealtimeData() {
+            onValue(ref(db, 'portfolioData'), (snapshot) => {
+                if (!snapshot.exists()) return;
+                const parsed = snapshot.val();
 
                 if (parsed.personal) {
                     if (parsed.personal.name) document.getElementById('nameDisplay').innerText = parsed.personal.name;
@@ -251,12 +254,10 @@
                 if (parsed.sections) {
                     currentPortfolioData = parsed.sections;
                 }
-            } catch (e) {
-                console.error("Lỗi khi load dữ liệu localStorage:", e);
-            }
+            });
         }
 
-        function openModal(sectionId) {
+        window.openModal = function(sectionId) {
             const data = currentPortfolioData[sectionId] || defaultPortfolioData[sectionId];
             if (data) {
                 document.getElementById('modalTitle').innerHTML = data.title || "Nội dung";
@@ -266,8 +267,6 @@
                 let linksList = [];
                 if (data.links && Array.isArray(data.links)) {
                     linksList = data.links;
-                } else if (data.driveUrl && data.driveUrl.trim() !== "") {
-                    linksList.push({ label: data.driveLabel, url: data.driveUrl });
                 }
 
                 if (linksList.length > 0) {
@@ -282,24 +281,16 @@
                             htmlContent += `<a href="${item.url}" target="_blank" class="btn-link-badge">🌐 ${buttonTitle}</a>`;
                         }
                     });
-                    htmlContent += `
-                            </div>
-                        </div>
-                    `;
+                    htmlContent += `</div></div>`;
                 }
 
                 let videosList = [];
                 if (data.videos && Array.isArray(data.videos)) {
                     videosList = data.videos;
-                } else if (data.videoUrl && data.videoUrl.trim() !== "") {
-                    videosList.push({ url: data.videoUrl });
                 }
 
                 if (videosList.length > 0) {
-                    htmlContent += `
-                        <div class="media-box">
-                            <strong>🎬 Video Minh Họa:</strong>
-                    `;
+                    htmlContent += `<div class="media-box"><strong>🎬 Video Minh Họa:</strong>`;
                     videosList.forEach(item => {
                         if (item.url && item.url.trim() !== "") {
                             let videoHtml = "";
@@ -318,16 +309,16 @@
                 document.getElementById('modalBody').innerHTML = htmlContent;
                 document.getElementById('myModal').style.display = 'flex';
             }
-        }
+        };
 
-        function closeModal(event) {
+        window.closeModal = function(event) {
             if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('close-btn')) {
                 document.getElementById('myModal').style.display = 'none';
             }
-        }
+        };
 
         window.onload = function() {
-            loadDataFromStorage();
+            listenRealtimeData();
         };
     </script>
 </body>
