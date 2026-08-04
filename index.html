@@ -31,7 +31,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
@@ -71,13 +71,14 @@
             transform: translateY(-1px);
         }
 
-        /* Khung nội dung PDF cố định tỉ lệ A4 Ngang */
+        /* Khung nội dung PDF */
         #pdfContent {
             background-color: var(--bg-color);
             padding: 16px;
             border-radius: 12px;
             width: 100%;
             box-sizing: border-box;
+            position: relative;
         }
 
         .header-container { 
@@ -176,18 +177,23 @@
         .media-box { margin-top: 8px; padding: 6px; background: rgba(255, 255, 255, 0.85); border-radius: 6px; }
         .link-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
         
+        /* Định vị chính xác nút liên kết để không bị lệch click */
         .btn-link-badge {
+            position: relative;
+            z-index: 5;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
+            gap: 6px;
+            padding: 6px 12px;
             background: #0f9d58;
             color: #ffffff !important;
             text-decoration: none !important;
             border-radius: 4px;
             font-weight: bold;
             font-size: 11.5px;
-            transition: all 0.15s ease;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background 0.15s ease;
         }
 
         .btn-link-badge:hover {
@@ -387,9 +393,9 @@
         };
     </script>
 
-    <!-- Kịch bản xuất PDF chất lượng cao, không vỡ nét & không mất góc -->
+    <!-- Xuất PDF chuẩn tọa độ, sắc nét không lệch link -->
     <script>
-        function exportToPDF() {
+        async function exportToPDF() {
             const element = document.getElementById('pdfContent');
             const btn = document.getElementById('pdfBtn');
             
@@ -397,31 +403,34 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XUẤT PDF...';
             btn.disabled = true;
 
+            // 1. Ép màn hình cuộn lên trên cùng để tránh lệch tọa độ canvas
+            window.scrollTo(0, 0);
+
+            // 2. Cấu hình html2pdf chuẩn tỉ lệ A4 Ngang
             const opt = {
                 margin:       [5, 5, 5, 5],
                 filename:     'Portfolio_LuongHoangPhuc.pdf',
-                image:        { type: 'png' }, // PNG giữ nét tuyệt đối, không nén mờ như JPEG
+                image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
-                    scale: 3,                // Độ phân giải siêu nét (300 DPI)
+                    scale: 2,               // Giữ độ nét mịn chuẩn 300 DPI và KHÔNG làm lệch link
                     useCORS: true, 
                     logging: false,
                     letterRendering: true,
-                    scrollX: 0,              // Cố định điểm chụp từ sát góc trái
-                    scrollY: 0,              // Cố định điểm chụp từ sát góc trên
-                    windowWidth: 1020        // Cố định viewport canvas khớp hoàn toàn với container
+                    scrollX: 0,
+                    scrollY: 0
                 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape', compress: true },
                 enableLinks:  true
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }).catch(err => {
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } catch (err) {
                 console.error("Lỗi xuất PDF:", err);
+            } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-            });
+            }
         }
     </script>
 </body>
