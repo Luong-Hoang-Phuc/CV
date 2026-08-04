@@ -93,7 +93,6 @@
             border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        /* FIX LỖI 1: Cố định độ rộng khung chứa tên đủ rộng cho cả họ tên */
         .profile-section { 
             display: flex; 
             flex-direction: column; 
@@ -128,7 +127,6 @@
             display: block;
         }
 
-        /* FIX LỖI 1: Tuyệt đối không cho phép xuống hàng chữ PHÚC */
         .profile-name { 
             font-size: 13px; 
             font-weight: 900; 
@@ -385,7 +383,7 @@
                     if (parsed.personal.email) document.getElementById('emailDisplay').innerText = parsed.personal.email;
 
                     if (parsed.personal.avatar) {
-                        document.getElementById('avatarDisplay').innerHTML = `<img src="${parsed.personal.avatar}" alt="Avatar">`;
+                        document.getElementById('avatarDisplay').innerHTML = `<img src="${parsed.personal.avatar}" alt="Avatar" crossorigin="anonymous">`;
                     }
                 }
 
@@ -410,106 +408,104 @@
         };
     </script>
 
-    <!-- FIX LỖI 2: CHUYỂN ẢNH SANG BASE64 & ÉP CHÍNH XÁC 1 TRANG PDF SẮC NÉT -->
+    <!-- XUẤT PDF CHUẨN NÉT BẰNG CÁCH NỐI KHUNG ẢO (CLONE DOM) CÁCH LY -->
     <script>
-        async function convertImagesToBase64(element) {
-            const imgs = element.querySelectorAll('img');
+        function urlToBase64(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth || img.width || 200;
+                    canvas.height = img.naturalHeight || img.height || 200;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    try {
+                        resolve(canvas.toDataURL('image/png'));
+                    } catch (e) {
+                        resolve(null);
+                    }
+                };
+                img.onerror = () => resolve(null);
+                img.src = url;
+            });
+        }
+
+        async function convertImagesToBase64(container) {
+            const imgs = container.querySelectorAll('img');
             for (let img of imgs) {
                 if (img.src && !img.src.startsWith('data:')) {
-                    try {
-                        const response = await fetch(img.src, { mode: 'cors' }).catch(() => null);
-                        if (response && response.ok) {
-                            const blob = await response.blob();
-                            const base64 = await new Promise((resolve) => {
-                                const reader = new FileReader();
-                                reader.onloadend = () => resolve(reader.result);
-                                reader.readAsDataURL(blob);
-                            });
-                            img.src = base64;
-                            continue;
-                        }
-                    } catch (e) {
-                        console.warn('Tải blob base64 thất bại, thử canvas:', e);
-                    }
-
-                    try {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const tempImg = new Image();
-                        tempImg.crossOrigin = 'Anonymous';
-                        await new Promise((resolve) => {
-                            tempImg.onload = () => {
-                                canvas.width = tempImg.naturalWidth || tempImg.width || 100;
-                                canvas.height = tempImg.naturalHeight || tempImg.height || 100;
-                                ctx.drawImage(tempImg, 0, 0);
-                                try {
-                                    img.src = canvas.toDataURL('image/png');
-                                } catch (e) {}
-                                resolve();
-                            };
-                            tempImg.onerror = () => resolve();
-                            tempImg.src = img.src;
-                        });
-                    } catch (e) {}
+                    const b64 = await urlToBase64(img.src);
+                    if (b64) img.src = b64;
                 }
             }
         }
 
         async function exportToPDF() {
-            const element = document.getElementById('pdfContent');
             const btn = document.getElementById('pdfBtn');
-            
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XUẤT PDF...';
             btn.disabled = true;
 
-            window.scrollTo(0, 0);
-
-            // 1. Chốt cố định chiều rộng giao diện chuẩn Desktop
-            const originalWidth = element.style.width;
-            const originalMaxWidth = element.style.maxWidth;
-            
-            element.style.width = '1100px';
-            element.style.maxWidth = '1100px';
-
-            // 2. Chuyển ảnh sang Base64 để html2canvas không bị trôi/mất ảnh do CORS
-            await convertImagesToBase64(element);
-
-            await new Promise(r => setTimeout(r, 200));
-
-            // 3. Đo đạc chiều cao thực tế + cộng thêm 15px đệm để KHÔNG BAO GIỜ bị nhảy trang số 2
-            const exportWidth = element.offsetWidth;
-            const exportHeight = element.offsetHeight + 15;
-
-            const opt = {
-                margin:       0,
-                filename:     'Portfolio_LuongHoangPhuc.pdf',
-                image:        { type: 'jpeg', quality: 0.98 }, 
-                html2canvas:  { 
-                    scale: 3,                 // Độ nét cực cao (~300 DPI)
-                    useCORS: true, 
-                    allowTaint: true,
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: 1100
-                },
-                jsPDF:        { 
-                    unit: 'px', 
-                    format: [exportWidth, exportHeight], // Vừa khít khung hình -> luôn đúng 1 trang
-                    orientation: 'landscape',
-                    compress: true 
-                },
-                pagebreak:    { mode: '' } // Vô hiệu hóa ngắt trang tự động
-            };
-
             try {
-                await html2pdf().set(opt).from(element).save();
+                const source = document.getElementById('pdfContent');
+
+                // 1. Tạo container cách ly đặt tại gốc tọa độ (0, 0) chống lệch lề / xén trái hoàn toàn
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'fixed';
+                wrapper.style.top = '0';
+                wrapper.style.left = '0';
+                wrapper.style.width = '1080px';
+                wrapper.style.zIndex = '-99999';
+                wrapper.style.backgroundColor = getComputedStyle(document.body).getPropertyValue('--bg-color') || '#0b2b26';
+
+                const clone = source.cloneNode(true);
+                clone.style.width = '1080px';
+                clone.style.maxWidth = '1080px';
+                clone.style.margin = '0';
+                clone.style.padding = '24px';
+                clone.style.boxSizing = 'border-box';
+
+                wrapper.appendChild(clone);
+                document.body.appendChild(wrapper);
+
+                // 2. Chuyển toàn bộ ảnh trong khung clone sang Base64
+                await convertImagesToBase64(clone);
+                await new Promise(r => setTimeout(r, 250));
+
+                const exportWidth = clone.offsetWidth;
+                const exportHeight = clone.offsetHeight + 10;
+
+                const opt = {
+                    margin:       0,
+                    filename:     'Portfolio_LuongHoangPhuc.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 }, 
+                    html2canvas:  { 
+                        scale: 2.5,
+                        useCORS: true, 
+                        allowTaint: true,
+                        logging: false,
+                        x: 0,
+                        y: 0,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: 1080
+                    },
+                    jsPDF:        { 
+                        unit: 'px', 
+                        format: [exportWidth, exportHeight],
+                        orientation: 'landscape',
+                        compress: true 
+                    },
+                    pagebreak:    { mode: '' }
+                };
+
+                await html2pdf().set(opt).from(clone).save();
+                document.body.removeChild(wrapper);
             } catch (err) {
                 console.error("Lỗi xuất PDF:", err);
+                alert("Đã xảy ra lỗi khi xuất file PDF, vui lòng thử lại!");
             } finally {
-                element.style.width = originalWidth;
-                element.style.maxWidth = originalMaxWidth;
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
