@@ -74,7 +74,7 @@
         /* Khung nội dung PDF */
         #pdfContent {
             background-color: var(--bg-color);
-            padding: 24px; /* Tăng padding để lề rộng rãi hơn */
+            padding: 24px;
             border-radius: 12px;
             width: 100%;
             box-sizing: border-box;
@@ -93,11 +93,13 @@
             border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
+        /* FIX LỖI 1: Tăng kích thước vùng chứa tên và chống nhảy hàng */
         .profile-section { 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            width: 140px; 
+            min-width: 170px; 
+            width: auto;
             flex-shrink: 0;
             text-align: center; 
         }
@@ -119,8 +121,22 @@
             border: 2px solid #fff;
         }
 
-        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-name { font-size: 13.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
+        .avatar-circle img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block;
+        }
+
+        /* FIX LỖI 1: Ép họ tên luôn nằm trên 1 hàng */
+        .profile-name { 
+            font-size: 13.5px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            color: #000; 
+            white-space: nowrap; 
+        }
         
         .info-section { 
             flex-grow: 1; 
@@ -132,7 +148,6 @@
         }
         .info-section p { margin: 3px 0; }
         
-        /* Grid 3 cột x 2 hàng dàn đều */
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -177,7 +192,6 @@
         .media-box { margin-top: 10px; padding: 8px; background: rgba(255, 255, 255, 0.85); border-radius: 6px; }
         .link-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
         
-        /* Định vị chính xác nút liên kết để không bị lệch click */
         .btn-link-badge {
             position: relative;
             z-index: 5;
@@ -233,7 +247,7 @@
             <div class="header-container">
                 <div class="profile-section">
                     <div class="avatar-circle" id="avatarDisplay">Avatar</div>
-                    <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
+                    <div class="profile-name" id="nameDisplay">LƯƠNG HOÀNG PHÚC</div>
                 </div>
                 <div class="info-section">
                     <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
@@ -393,7 +407,7 @@
         };
     </script>
 
-    <!-- Xuất PDF kích thước Custom (Đúng tỷ lệ gốc 1:1, không nén, không mờ) -->
+    <!-- FIX LỖI 2: Xuất PDF nét cực cao (~400DPI), giữ nguyên tỷ lệ hình ảnh -->
     <script>
         async function exportToPDF() {
             const element = document.getElementById('pdfContent');
@@ -403,39 +417,35 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XUẤT PDF...';
             btn.disabled = true;
 
-            // 1. Ép màn hình cuộn lên trên cùng
             window.scrollTo(0, 0);
 
-            // 2. Chốt cố định chiều rộng thành chuẩn Desktop (ví dụ: 1100px) 
-            // Bước này CỰC KỲ QUAN TRỌNG để PDF không bị bóp méo hay xếp dọc khi đang xem trên màn hình nhỏ.
+            // Cố định kích thước chuẩn Desktop cho canvas
             const originalWidth = element.style.width;
             const originalMaxWidth = element.style.maxWidth;
             
             element.style.width = '1100px';
             element.style.maxWidth = '1100px';
 
-            // Đợi 1 chút để DOM cập nhật style
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 150));
 
-            // 3. Đo đạc chính xác kích thước pixel thật của element sau khi ép size
             const exportWidth = element.offsetWidth;
             const exportHeight = element.offsetHeight;
 
-            // 4. Cấu hình jsPDF nhận Custom Size thay vì "A4" để khớp 100% tỷ lệ
             const opt = {
-                margin:       0, // Không cần margin của jsPDF vì ta đã có padding trong #pdfContent
+                margin:       0,
                 filename:     'Portfolio_LuongHoangPhuc.pdf',
-                image:        { type: 'png' }, // BẮT BUỘC dùng PNG để nét chữ không bị nhiễu nén (Artifacts)
+                image:        { type: 'png' }, 
                 html2canvas:  { 
-                    scale: 3,               // Tỉ lệ scale 3 mang lại độ nét tuyệt đối (~300 DPI)
+                    scale: 4,               // Đẩy lên scale 4 giúp ảnh và chữ sắc nét tuyệt đối
                     useCORS: true, 
                     logging: false,
                     scrollX: 0,
-                    scrollY: 0
+                    scrollY: 0,
+                    windowWidth: 1100      // Ép html2canvas nhận diện chiều rộng màn hình chuẩn 1100px
                 },
                 jsPDF:        { 
                     unit: 'px', 
-                    format: [exportWidth, exportHeight], // <- BÍ QUYẾT TẠI ĐÂY: Tạo file PDF có kích thước khớp 100% tỷ lệ thực tế
+                    format: [exportWidth, exportHeight],
                     orientation: 'landscape',
                     compress: true 
                 },
@@ -447,7 +457,6 @@
             } catch (err) {
                 console.error("Lỗi xuất PDF:", err);
             } finally {
-                // Trả lại trạng thái Responsive như cũ
                 element.style.width = originalWidth;
                 element.style.maxWidth = originalMaxWidth;
                 btn.innerHTML = originalText;
