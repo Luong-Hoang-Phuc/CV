@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio Số - Công Nghệ Kỹ Thuật In</title>
-    <!-- Thư viện Font Awesome cho các Icon Facebook, LinkedIn,... -->
+    <!-- Thư viện Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Thư viện html2pdf.js xuất PDF giữ nguyên link -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root {
             --bg-color: #0b2b26;
@@ -18,9 +21,39 @@
             background-color: var(--bg-color); 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
-            padding: 40px 20px; 
+            padding: 20px; 
             color: var(--text-color); 
             transition: background-color 0.3s;
+        }
+
+        /* Thanh công cụ thao tác (Nút Tải PDF) */
+        .action-bar {
+            max-width: 1100px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-pdf {
+            background-color: #ff4757;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+
+        .btn-pdf:hover {
+            background-color: #ff6b81;
+            transform: translateY(-2px);
         }
 
         .header-container { 
@@ -28,162 +61,189 @@
             justify-content: space-between; 
             align-items: center; 
             max-width: 1100px; 
-            margin: 0 auto 40px auto; 
-            background: rgba(255, 255, 255, 0.9); 
+            margin: 0 auto 25px auto; 
+            background: rgba(255, 255, 255, 0.95); 
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 35px 40px; 
-            border-radius: 24px; 
+            padding: 25px 35px; 
+            border-radius: 20px; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        .profile-section { display: flex; flex-direction: column; align-items: center; width: 220px; text-align: center; }
+        .profile-section { display: flex; flex-direction: column; align-items: center; width: 200px; text-align: center; }
         
         .avatar-circle { 
-            width: 160px; 
-            height: 160px; 
+            width: 130px; 
+            height: 130px; 
             background-color: #5b5b5b; 
             border-radius: 50%; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             color: #fff; 
-            font-size: 28px; 
+            font-size: 24px; 
             font-weight: bold;
-            margin-bottom: 15px; 
+            margin-bottom: 10px; 
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 4px solid #fff;
+            border: 3px solid #fff;
         }
 
         .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-name { font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #000; }
+        .profile-name { font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #000; }
         
         .info-section { 
             flex-grow: 1; 
-            margin-left: 40px; 
-            font-size: 17px; 
-            line-height: 1.8; 
+            margin-left: 30px; 
+            font-size: 15px; 
+            line-height: 1.7; 
             font-weight: 600; 
             color: #111;
-            word-break: break-word; /* Tự động ngắt dòng thông minh cho email/chuỗi dài */
-            overflow-wrap: anywhere;
+            word-break: break-word;
         }
-        .info-section p { margin: 6px 0; }
+        .info-section p { margin: 4px 0; }
         
-        /* Grid hiển thị các Card mở */
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
-            gap: 30px; 
+            gap: 20px; 
             max-width: 1100px; 
             margin: 0 auto; 
         }
 
-        /* Thẻ hiển thị mở theo mẫu thiết kế */
         .section-card {
             background-color: var(--card-bg);
-            border-radius: 24px;
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
             display: flex;
             flex-direction: column;
             border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
-        /* Thanh tiêu đề Banner bo góc */
         .section-banner {
             background-color: var(--banner-bg);
             color: #000000;
-            padding: 18px 25px;
-            font-size: 22px;
+            padding: 12px 20px;
+            font-size: 18px;
             font-weight: 900;
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            letter-spacing: 0.5px;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
         }
 
-        /* Phần nội dung chi tiết bên dưới */
         .section-body {
-            padding: 25px;
-            font-size: 16px;
-            line-height: 1.7;
+            padding: 18px;
+            font-size: 14px;
+            line-height: 1.6;
             color: #111;
             flex-grow: 1;
         }
 
-        .section-body ul {
-            padding-left: 20px;
-            margin: 0;
-        }
-        
-        .media-box { margin-top: 18px; padding: 15px; background: rgba(255, 255, 255, 0.7); border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); }
-        .link-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+        .section-body ul { padding-left: 18px; margin: 0; }
+        .media-box { margin-top: 10px; padding: 10px; background: rgba(255, 255, 255, 0.7); border-radius: 10px; }
+        .link-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
         .btn-link-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
+            gap: 6px;
+            padding: 6px 14px;
             background: #0f9d58;
             color: #ffffff;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: bold;
-            font-size: 15px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .btn-link-badge i { font-size: 18px; }
-        .btn-link-badge:hover {
-            background: #0b8043;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+            font-size: 13px;
         }
 
-        .video-container { margin-top: 12px; width: 100%; aspect-ratio: 16 / 9; }
-        .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 8px; border: none; }
+        .video-container { margin-top: 8px; width: 100%; aspect-ratio: 16 / 9; }
+        .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 6px; border: none; }
 
-        /* Tối ưu responsive màn hình tablet và mobile */
-        @media (max-width: 900px) {
-            .header-container { flex-direction: column; text-align: center; padding: 30px 20px; }
-            .profile-section { width: 100%; }
-            .info-section { margin: 20px 0 0 0; text-align: left; width: 100%; }
-            .grid-container { grid-template-columns: 1fr; }
-        }
+        /* ==========================================
+           CẤU HÌNH IN / XUẤT PDF CHUẨN 1 TRANG NGANG
+           ========================================== */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 5mm;
+            }
 
-        /* Cấu hình chuẩn riêng cho Điện thoại nhỏ (Mobile Fix) */
-        @media (max-width: 600px) {
-            body { padding: 15px 10px; }
-            .header-container { padding: 25px 18px; border-radius: 20px; margin-bottom: 25px; }
-            .avatar-circle { width: 130px; height: 130px; }
-            .profile-name { font-size: 18px; }
-            .info-section { font-size: 15px; line-height: 1.6; }
-            .info-section p { margin: 8px 0; }
-            .section-banner { font-size: 19px; padding: 14px 18px; }
-            .section-body { padding: 18px; font-size: 15px; }
+            body {
+                background-color: var(--bg-color) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                zoom: 67%; /* Thu nhỏ tổng thể vừa đúng 1 trang A4 nằm ngang */
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .header-container {
+                margin-bottom: 12px !important;
+                padding: 15px 20px !important;
+                border-radius: 14px !important;
+            }
+
+            /* Chuyển grid thành 3 cột x 2 hàng để dàn đều 6 card trong 1 trang ngang */
+            .grid-container {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 12px !important;
+            }
+
+            .section-card {
+                border-radius: 12px !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .section-banner {
+                padding: 8px 12px !important;
+                font-size: 15px !important;
+            }
+
+            .section-body {
+                padding: 10px !important;
+                font-size: 12px !important;
+                line-height: 1.4 !important;
+            }
+
+            /* Đảm bảo đường liên kết vẫn giữ thuộc tính clickable */
+            a {
+                text-decoration: none !important;
+                color: inherit !important;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <div class="profile-section">
-            <div class="avatar-circle" id="avatarDisplay">Avatar</div>
-            <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
-        </div>
-        <div class="info-section">
-            <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
-            <p><strong>Ngành:</strong> <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
-            <p><strong>Khóa:</strong> <span id="courseDisplay">K2021 (Năm 3)</span></p>
-            <p><strong>Mã số sinh viên:</strong> <span id="studentIdDisplay">21150000</span></p>
-            <p><strong>Số điện thoại:</strong> <span id="phoneDisplay">0901234567</span></p>
-            <p><strong>Gmail:</strong> <span id="emailDisplay">sinhvien@example.com</span></p>
-        </div>
+    <!-- Thanh thao tác chứa nút tải PDF -->
+    <div class="action-bar no-print">
+        <button class="btn-pdf" onclick="exportToPDF()">
+            <i class="fa-solid fa-file-pdf"></i> TẢI PDF (1 TRANG NGANG)
+        </button>
     </div>
 
-    <!-- Danh sách các thẻ hiển thị trực tiếp -->
-    <div class="grid-container" id="gridContainer"></div>
+    <div id="pdfContent">
+        <div class="header-container">
+            <div class="profile-section">
+                <div class="avatar-circle" id="avatarDisplay">Avatar</div>
+                <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
+            </div>
+            <div class="info-section">
+                <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
+                <p><strong>Ngành:</strong> <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
+                <p><strong>Khóa:</strong> <span id="courseDisplay">K2021 (Năm 3)</span></p>
+                <p><strong>Mã số sinh viên:</strong> <span id="studentIdDisplay">21150000</span></p>
+                <p><strong>Số điện thoại:</strong> <span id="phoneDisplay">0901234567</span></p>
+                <p><strong>Gmail:</strong> <span id="emailDisplay">sinhvien@example.com</span></p>
+            </div>
+        </div>
+
+        <div class="grid-container" id="gridContainer"></div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -208,14 +268,7 @@
         const defaultPortfolioData = {
             'gioi-thieu': {
                 title: "1. Giới thiệu",
-                content: `
-                    <p style="margin-bottom: 12px; font-weight: bold; font-size: 17px;">Sinh viên năm 3 - Chuyên ngành Công nghệ Kỹ thuật In</p>
-                    <ul style="line-height: 1.8;">
-                        <li><strong>Kiến thức nền tảng:</strong> Hiểu biết tốt về các công nghệ in Offset, Flexo, KTS, Lụa, Ống đồng và cả 3 giai đoạn (Chế bản &rarr; In &rarr; Thành phẩm).</li>
-                        <li><strong>Kinh nghiệm thực tế:</strong> Đã hoàn thành 2 kỳ thực tập chuyên ngành.</li>
-                        <li><strong>Đồ án đã thực hiện:</strong> Thiết kế cấu trúc, Trình bày ấn phẩm, Chế bản, Thành phẩm...</li>
-                    </ul>
-                `
+                content: `<p style="margin-bottom: 8px; font-weight: bold;">Sinh viên năm 3 - Chuyên ngành Công nghệ Kỹ thuật In</p><ul><li><strong>Kiến thức:</strong> Offset, Flexo, KTS, Chế bản & Thành phẩm.</li><li><strong>Kinh nghiệm:</strong> 2 kỳ thực tập chuyên ngành.</li></ul>`
             },
             'mang-xa-hoi': {
                 title: "2. Mạng xã hội & Liên hệ",
@@ -223,19 +276,19 @@
             },
             'ky-nang': {
                 title: "3. Kỹ năng chuyên môn",
-                content: "<ul><li><strong>Công nghệ in:</strong> Offset tờ rời, Flexo, In kỹ thuật số.</li><li><strong>Phần mềm:</strong> Adobe CC, Esko, Pitstop, i1Profiler, Prinect.</li><li><strong>Tiêu chuẩn:</strong> ISO 12647, Cân bằng xám G7.</li></ul>"
+                content: "<ul><li><strong>Công nghệ:</strong> Offset, Flexo, In KTS.</li><li><strong>Phần mềm:</strong> Adobe CC, Esko, Pitstop, Prinect.</li><li><strong>Tiêu chuẩn:</strong> ISO 12647, G7.</li></ul>"
             },
             'chung-chi': {
                 title: "4. Chứng chỉ & Khóa học",
-                content: "<ul><li>Chứng chỉ Quản lý Màu G7 (G7 Expert - cơ bản).</li><li>Chứng nhận An toàn Lao động & Môi trường.</li><li>Khóa học Xử lý file Preflight PDF/X.</li></ul>"
+                content: "<ul><li>Chứng chỉ Quản lý Màu G7 (Basic).</li><li>An toàn Lao động & Môi trường.</li><li>Xử lý file Preflight PDF/X.</li></ul>"
             },
             'kinh-nghiem': {
                 title: "5. Kinh nghiệm thực tập",
-                content: "<strong>Công ty Bao bì X</strong><br>Vị trí: Thực tập sinh QC & Quản lý màu.<br>Thực hiện kiểm tra bài in, đo đạc thông số màu sắc, và báo cáo dữ liệu định kỳ."
+                content: "<strong>Công ty Bao bì X</strong><br>Vị trí: QC & Quản lý màu.<br>Kiểm tra bài in, đo đạc thông số màu và lập báo cáo."
             },
             'du-an': {
                 title: "6. Dự án tiêu biểu (Mô hình CAR)",
-                content: "<strong>Dự án: Ổn định màu đơn hàng hộp giấy (Offset tờ rời)</strong><br><ul><li><strong>Bối cảnh (C):</strong> Khách hàng phàn nàn màu sắc không đồng đều giữa các ca in.</li><li><strong>Hành động (A):</strong> Dùng máy đo X-Rite, hiệu chỉnh đường cong TVI theo chuẩn G7.</li><li><strong>Kết quả (R):</strong> Giảm độ lệch màu trung bình từ 3.4 xuống 1.7. Giảm 15% phế phẩm.</li></ul>"
+                content: "<strong>Dự án: Ổn định màu hộp giấy Offset</strong><ul><li><strong>C:</strong> Màu lệch giữa các ca in.</li><li><strong>A:</strong> Hiệu chỉnh TVI chuẩn G7.</li><li><strong>R:</strong> Giảm Delta E từ 3.4 xuống 1.7.</li></ul>"
             }
         };
 
@@ -252,11 +305,7 @@
                 let contentHtml = (data.content && data.content.trim() !== "") ? `<div>${data.content}</div>` : "";
 
                 if (data.links && Array.isArray(data.links) && data.links.length > 0) {
-                    contentHtml += `
-                        <div class="media-box">
-                            <strong>🔗 </strong>
-                            <div class="link-buttons">
-                    `;
+                    contentHtml += `<div class="media-box"><strong>🔗 </strong><div class="link-buttons">`;
                     data.links.forEach(item => {
                         if (item.url && item.url.trim() !== "") {
                             const buttonTitle = (item.label && item.label.trim() !== "") ? item.label : "Mở Xem Tài Liệu";
@@ -264,11 +313,8 @@
                             const labelLower = buttonTitle.toLowerCase();
                             const urlLower = item.url.toLowerCase();
 
-                            if (labelLower.includes('facebook') || urlLower.includes('facebook.com') || urlLower.includes('fb.com')) {
-                                iconHtml = '<i class="fa-brands fa-facebook"></i>';
-                            } else if (labelLower.includes('linkedin') || urlLower.includes('linkedin.com')) {
-                                iconHtml = '<i class="fa-brands fa-linkedin"></i>';
-                            }
+                            if (labelLower.includes('facebook') || urlLower.includes('facebook.com')) iconHtml = '<i class="fa-brands fa-facebook"></i>';
+                            else if (labelLower.includes('linkedin') || urlLower.includes('linkedin.com')) iconHtml = '<i class="fa-brands fa-linkedin"></i>';
 
                             contentHtml += `<a href="${item.url}" target="_blank" class="btn-link-badge">${iconHtml} ${buttonTitle}</a>`;
                         }
@@ -277,7 +323,7 @@
                 }
 
                 if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
-                    contentHtml += `<div class="media-box"><strong>🎬 Video Minh Họa:</strong>`;
+                    contentHtml += `<div class="media-box"><strong>🎬 Video:</strong>`;
                     data.videos.forEach(item => {
                         if (item.url && item.url.trim() !== "") {
                             let videoHtml = "";
@@ -345,6 +391,13 @@
             renderAllSections();
             listenRealtimeData();
         };
+    </script>
+
+    <!-- Kịch bản xuất PDF bằng Trình In Hệ Thống (Màu sắc nét, Vector PDF, Link sống 100%) -->
+    <script>
+        function exportToPDF() {
+            window.print();
+        }
     </script>
 </body>
 </html>
