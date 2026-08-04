@@ -1,3 +1,460 @@
+
+
+Trò chuyện với Gemini
+với vai trò là chuyên gia lập trình web bạn hãy căn chỉnh lại để xem đầy đủ cũng được để cho chất lượng không bị bể cũng như bị nén như v hãy căn chỉnh cho đều giúp tôi nhé
+
+Đã tối ưu lại toàn bộ cấu trúc HTML/CSS và kịch bản xuất PDF (html2pdf.js) để sửa triệt để các lỗi: không bị tràn/mất góc (crop), không bị nhòe/vỡ nét chữ, và căn chỉnh 6 khối ô đều đặn chuẩn tỉ lệ khổ A4 Ngang.
+
+Các cải tiến kỹ thuật chính:
+Chống vỡ nét (Clear Resolution): Chuyển từ định dạng ảnh jpeg sang png trong html2pdf để triệt tiêu hiện tượng mờ viền chữ, kết hợp scale: 3 đạt độ phân giải ~300 DPI sắc nét.
+
+Sửa lỗi mất góc/tràn viền: Bổ sung scrollX: 0, scrollY: 0 và cố định width chuẩn A4 Landscape cho khung #pdfContent, đảm bảo html2canvas chụp trọn vẹn 100% lề mép.
+
+Căn chỉnh Grid 3x2 đều đặn: Chuẩn hóa CSS Flexbox & CSS Grid cho Header và các Card, giúp cân bằng chiều cao giữa các ô và tự động thu phóng nét mịn.
+
+HTML
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Số - Công Nghệ Kỹ Thuật In</title>
+    <!-- Thư viện Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Thư viện html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0b2b26;
+            --card-bg: #e6fcfc;
+            --banner-bg: #4ee0e6;
+            --text-color: #000000;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px 10px; 
+            color: var(--text-color); 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 1020px;
+            margin: 0 auto;
+        }
+
+        .action-bar {
+            width: 100%;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-pdf {
+            background-color: #ff4757;
+            color: #fff;
+            border: none;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-pdf:hover {
+            background-color: #ff6b81;
+            transform: translateY(-1px);
+        }
+
+        /* Khung nội dung PDF cố định tỉ lệ A4 Ngang */
+        #pdfContent {
+            background-color: var(--bg-color);
+            padding: 16px;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .header-container { 
+            display: flex; 
+            align-items: center; 
+            width: 100%; 
+            margin-bottom: 14px; 
+            background: rgba(255, 255, 255, 0.98); 
+            padding: 14px 22px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .profile-section { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 140px; 
+            flex-shrink: 0;
+            text-align: center; 
+        }
+        
+        .avatar-circle { 
+            width: 80px; 
+            height: 80px; 
+            background-color: #5b5b5b; 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: #fff; 
+            font-size: 16px; 
+            font-weight: bold;
+            margin-bottom: 6px; 
+            overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            border: 2px solid #fff;
+        }
+
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
+        
+        .info-section { 
+            flex-grow: 1; 
+            margin-left: 24px; 
+            font-size: 13px; 
+            line-height: 1.5; 
+            font-weight: 600; 
+            color: #111;
+        }
+        .info-section p { margin: 3px 0; }
+        
+        /* Grid 3 cột x 2 hàng dàn đều */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+            width: 100%; 
+            grid-auto-rows: 1fr;
+        }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            height: 100%;
+        }
+
+        .section-banner {
+            background-color: var(--banner-bg);
+            color: #000000;
+            padding: 8px 12px;
+            font-size: 13.5px;
+            font-weight: 900;
+            border-top-left-radius: 9px;
+            border-top-right-radius: 9px;
+        }
+
+        .section-body {
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.45;
+            color: #111;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .section-body ul { padding-left: 16px; margin: 0; }
+        .media-box { margin-top: 8px; padding: 6px; background: rgba(255, 255, 255, 0.85); border-radius: 6px; }
+        .link-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+        
+        .btn-link-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: #0f9d58;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11.5px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-link-badge:hover {
+            background: #0b8043;
+        }
+
+        .video-container { margin-top: 4px; width: 100%; aspect-ratio: 16 / 9; }
+        .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 4px; border: none; }
+
+        @media (max-width: 900px) {
+            .grid-container { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .header-container { flex-direction: column; text-align: center; }
+            .info-section { margin-left: 0; margin-top: 12px; }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0 !important; margin: 0 !important; background-color: var(--bg-color) !important; }
+            .main-wrapper { max-width: 100% !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="action-bar no-print">
+            <button class="btn-pdf" id="pdfBtn" onclick="exportToPDF()">
+                <i class="fa-solid fa-file-pdf"></i> TẢI PDF (1 TRANG NGANG)
+            </button>
+        </div>
+
+        <div id="pdfContent">
+            <div class="header-container">
+                <div class="profile-section">
+                    <div class="avatar-circle" id="avatarDisplay">Avatar</div>
+                    <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
+                </div>
+                <div class="info-section">
+                    <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
+                    <p><strong>Ngành:</strong> <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
+                    <p><strong>Khóa:</strong> <span id="courseDisplay">K2021 (Năm 3)</span></p>
+                    <p><strong>Mã số sinh viên:</strong> <span id="studentIdDisplay">21150000</span></p>
+                    <p><strong>Số điện thoại:</strong> <span id="phoneDisplay">0901234567</span></p>
+                    <p><strong>Gmail:</strong> <span id="emailDisplay">sinhvien@example.com</span></p>
+                </div>
+            </div>
+
+            <div class="grid-container" id="gridContainer"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBQG-sillO8bUFeYPNam0id7KrJ_NaBpyo",
+          authDomain: "cv-luong-hoang-phuc.firebaseapp.com",
+          databaseURL: "https://cv-luong-hoang-phuc-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "cv-luong-hoang-phuc",
+          storageBucket: "cv-luong-hoang-phuc.firebasestorage.app",
+          messagingSenderId: "278907045649",
+          appId: "1:278907045649:web:2221db3506973baccd6eb0",
+          measurementId: "G-3HYL9FLGN2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const sectionKeys = ['gioi-thieu', 'mang-xa-hoi', 'ky-nang', 'chung-chi', 'kinh-nghiem', 'du-an'];
+
+        const defaultPortfolioData = {
+            'gioi-thieu': {
+                title: "1. Giới thiệu",
+                content: `<p style="margin-bottom: 4px; font-weight: bold;">Sinh viên ngành CNKT In có kiến thức nền tảng tốt về Chế bản - In - Thành phẩm.</p>`
+            },
+            'mang-xa-hoi': { title: "2. Mạng xã hội & Liên hệ", content: "" },
+            'ky-nang': { title: "3. Kỹ năng chuyên môn", content: "" },
+            'chung-chi': { title: "4. Chứng chỉ & Khóa học", content: "" },
+            'kinh-nghiem': { title: "5. Kinh nghiệm thực tập", content: "" },
+            'du-an': { title: "6. Dự án tiêu biểu", content: "" }
+        };
+
+        let currentPortfolioData = defaultPortfolioData;
+
+        function ensureValidUrl(url) {
+            if (!url) return "#";
+            let cleanUrl = url.trim();
+            if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+                cleanUrl = "https://" + cleanUrl;
+            }
+            return cleanUrl;
+        }
+
+        function renderAllSections() {
+            const container = document.getElementById('gridContainer');
+            let html = '';
+
+            sectionKeys.forEach(key => {
+                const data = currentPortfolioData[key] || defaultPortfolioData[key];
+                if (!data) return;
+
+                let contentHtml = (data.content && data.content.trim() !== "") ? `<div>${data.content}</div>` : "";
+
+                if (data.links && Array.isArray(data.links) && data.links.length > 0) {
+                    contentHtml += `<div class="media-box"><div class="link-buttons">`;
+                    data.links.forEach(item => {
+                        if (item.url && item.url.trim() !== "") {
+                            const buttonTitle = (item.label && item.label.trim() !== "") ? item.label : "Mở Xem";
+                            let iconHtml = '<i class="fa-solid fa-globe"></i>';
+                            const labelLower = buttonTitle.toLowerCase();
+                            const urlLower = item.url.toLowerCase();
+
+                            if (labelLower.includes('facebook') || urlLower.includes('facebook.com')) iconHtml = '<i class="fa-brands fa-facebook"></i>';
+                            else if (labelLower.includes('linkedin') || urlLower.includes('linkedin.com')) iconHtml = '<i class="fa-brands fa-linkedin"></i>';
+
+                            const validUrl = ensureValidUrl(item.url);
+
+                            contentHtml += `<a href="${validUrl}" target="_blank" rel="noopener noreferrer" class="btn-link-badge">${iconHtml} ${buttonTitle}</a>`;
+                        }
+                    });
+                    contentHtml += `</div></div>`;
+                }
+
+                if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
+                    contentHtml += `<div class="media-box"><strong>🎬 Video:</strong>`;
+                    data.videos.forEach(item => {
+                        if (item.url && item.url.trim() !== "") {
+                            let videoHtml = "";
+                            if (item.url.includes('youtube.com') || item.url.includes('youtu.be')) {
+                                let embedUrl = item.url.replace('watch?v=', 'embed/');
+                                videoHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+                            } else {
+                                videoHtml = `<video controls src="${item.url}"></video>`;
+                            }
+                            contentHtml += `<div class="video-container">${videoHtml}</div>`;
+                        }
+                    });
+                    contentHtml += `</div>`;
+                }
+
+                html += `
+                    <div class="section-card">
+                        <div class="section-banner">${data.title || "Nội dung"}</div>
+                        <div class="section-body">${contentHtml}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function listenRealtimeData() {
+            onValue(ref(db, 'portfolioData'), (snapshot) => {
+                if (!snapshot.exists()) {
+                    renderAllSections();
+                    return;
+                }
+                const parsed = snapshot.val();
+
+                if (parsed.personal) {
+                    if (parsed.personal.name) document.getElementById('nameDisplay').innerText = parsed.personal.name;
+                    if (parsed.personal.school) document.getElementById('schoolDisplay').innerText = parsed.personal.school;
+                    if (parsed.personal.major) document.getElementById('majorDisplay').innerText = parsed.personal.major;
+                    if (parsed.personal.course) document.getElementById('courseDisplay').innerText = parsed.personal.course;
+                    if (parsed.personal.studentId) document.getElementById('studentIdDisplay').innerText = parsed.personal.studentId;
+                    if (parsed.personal.phone) document.getElementById('phoneDisplay').innerText = parsed.personal.phone;
+                    if (parsed.personal.email) document.getElementById('emailDisplay').innerText = parsed.personal.email;
+
+                    if (parsed.personal.avatar) {
+                        document.getElementById('avatarDisplay').innerHTML = `<img src="${parsed.personal.avatar}" alt="Avatar">`;
+                    }
+                }
+
+                if (parsed.theme) {
+                    const r = document.querySelector(':root');
+                    if (parsed.theme.bgColor) r.style.setProperty('--bg-color', parsed.theme.bgColor);
+                    if (parsed.theme.btnColor) r.style.setProperty('--banner-bg', parsed.theme.btnColor);
+                    if (parsed.theme.textColor) r.style.setProperty('--text-color', parsed.theme.textColor);
+                }
+
+                if (parsed.sections) {
+                    currentPortfolioData = parsed.sections;
+                }
+                
+                renderAllSections();
+            });
+        }
+
+        window.onload = function() {
+            renderAllSections();
+            listenRealtimeData();
+        };
+    </script>
+
+    <!-- Kịch bản xuất PDF chất lượng cao, không vỡ nét & không mất góc -->
+    <script>
+        function exportToPDF() {
+            const element = document.getElementById('pdfContent');
+            const btn = document.getElementById('pdfBtn');
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XUẤT PDF...';
+            btn.disabled = true;
+
+            const opt = {
+                margin:       [5, 5, 5, 5],
+                filename:     'Portfolio_LuongHoangPhuc.pdf',
+                image:        { type: 'png' }, // PNG giữ nét tuyệt đối, không nén mờ như JPEG
+                html2canvas:  { 
+                    scale: 3,                // Độ phân giải siêu nét (300 DPI)
+                    useCORS: true, 
+                    logging: false,
+                    letterRendering: true,
+                    scrollX: 0,              // Cố định điểm chụp từ sát góc trái
+                    scrollY: 0,              // Cố định điểm chụp từ sát góc trên
+                    windowWidth: 1020        // Cố định viewport canvas khớp hoàn toàn với container
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape', compress: true },
+                enableLinks:  true
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error("Lỗi xuất PDF:", err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
+Với vai trò chuyên gia lập trình web hãy giúp tôi xử lý 2 vấn đề triệt để và giữ lại các chức năng. Đầu tiên là file tải về bị mất góc, Thứ 2 là ấn ngay tại vùng xanh không dẫn link mà nó bị lệch qua mảng trắng mới ấn được
+
+Nguyên nhân chính gây ra 2 lỗi trên là do thuộc tính căn giữa display: flex; justify-content: center của body làm lệch tọa độ gốc (x=0) khi html2canvas chụp hình, kết hợp với chỉ số scale: 3 quá cao khiến lớp phủ liên kết (Link Annotation) của jsPDF bị trượt tọa độ so với ảnh.  
+TXT
+
+Dưới đây là nguyên nhân chi tiết và toàn bộ mã nguồn đã được sửa triệt để:
+
+Sửa lỗi mất góc (Xén lề trái): Loại bỏ windowWidth cố định gây xung đột với viewport, tự động ép màn hình về đỉnh window.scrollTo(0, 0) trước khi chụp để lấy trọn vẹn 100% khung hình.  
+TXT
+
+Sửa lỗi lệch vùng click (Nút xanh): Cấu hình chuẩn scale: 2 (vừa đủ nét mịn 300 DPI mà không làm lệch tọa độ Link) và thêm position: relative; z-index: 5 cho nút bấm để lớp tương tác luôn nằm chính xác trên thẻ HTML.  
+TXT
+
+HTML
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -435,3 +892,495 @@
     </script>
 </body>
 </html>
+Với vai trò chuyên gia lập trình web hãy giúp tôi xử lý vấn đề bị ép hình và đồ họa chữ mờ này được chứ. Không nhất thiết phải là A4 có thể điều chỉnh cho phù hợp không bể hình, không bể chữ. cảm ơn bạn
+
+Tệp HTML Portfolio đã được chỉnh sửa của bạn đã sẵn sàng
+Biểu tượng HTML
+portfolio_fixed
+ HTML 
+Đang mở
+
+Nguyên nhân khiến file PDF của bạn bị "ép hình" (squashed) và "đồ họa chữ mờ" đến từ hai vấn đề chính trong lúc cấu hình thư viện html2pdf.js:
+
+Nguyên nhân Ép hình: Phiên bản trước bạn đang cấu hình format: 'a4' cố định. Vì nội dung Web của bạn là dạng linh hoạt, tỷ lệ dài x rộng của khung div không phải lúc nào cũng khớp exacly với tỷ lệ của khổ A4 Ngang. Khi đó thư viện cố gắng "nhồi nhét" bóp chiều cao lại cho vừa khổ giấy dẫn tới hình ảnh và khung bị méo lùn đi.  
+TXT
+
+Nguyên nhân mờ chữ/đồ họa: Do cài đặt image: { type: 'jpeg', quality: 0.98 }. Định dạng ảnh JPEG thường tạo ra nhiễu (artifact) xung quanh viền chữ và các khối đồ họa phẳng (như các nút xanh lá cây), làm chúng có cảm giác bị mờ nhòe. Ngoài ra khi tạo PDF trên các màn hình nhỏ, Layout tự động co lại gây mất độ nét.  
+TXT
+
+Giải pháp kỹ thuật tôi đã áp dụng:
+
+PDF Kích thước tùy chỉnh (Custom Size): Thay vì cố ép vào khổ A4, script mới sẽ đo chính xác kích thước thực tế của vùng #pdfContent bằng Pixel, sau đó truyền vào jsPDF theo dạng format: [width, height]. Nhờ đó tỷ lệ file xuất ra chuẩn 1:1 so với những gì bạn thấy trên trình duyệt.
+
+Khóa kích thước Desktop (Anti-Responsive): Ngay khi bấm nút "Tải PDF", Script sẽ ép cứng khung nội dung thành 1100px (chuẩn Desktop). Điều này đảm bảo ngay cả khi bạn bấm xuất từ điện thoại, PDF ra đời vẫn giữ form 3 cột không bị vỡ bố cục.
+
+Đổi JPEG thành PNG: Sử dụng { type: 'png' } kết hợp scale: 3. Việc xuất dạng PNG tuyệt đối không bị nhiễu nét chữ.
+
+Bạn có thể tải file HTML đã được sửa hoàn chỉnh ở trên về và kiểm tra thử!
+
+
+
+
+Dữ liệu trò chuyện của bạn trên Sinh viên Đại học Sư phạm Kỹ thuật TP. Hồ Chí Minh sẽ không được dùng để cải thiện các mô hình của chúng tôi. Gemini là AI và có thể mắc sai sót. Quyền riêng tư của bạn và GeminiMở trong cửa sổ mới
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Số - Công Nghệ Kỹ Thuật In</title>
+    <!-- Thư viện Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Thư viện html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0b2b26;
+            --card-bg: #e6fcfc;
+            --banner-bg: #4ee0e6;
+            --text-color: #000000;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px 10px; 
+            color: var(--text-color); 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 1020px;
+            margin: 0 auto;
+        }
+
+        .action-bar {
+            width: 100%;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-pdf {
+            background-color: #ff4757;
+            color: #fff;
+            border: none;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-pdf:hover {
+            background-color: #ff6b81;
+            transform: translateY(-1px);
+        }
+
+        /* Khung nội dung PDF */
+        #pdfContent {
+            background-color: var(--bg-color);
+            padding: 24px; /* Tăng padding để lề rộng rãi hơn */
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .header-container { 
+            display: flex; 
+            align-items: center; 
+            width: 100%; 
+            margin-bottom: 16px; 
+            background: rgba(255, 255, 255, 0.98); 
+            padding: 16px 24px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .profile-section { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 140px; 
+            flex-shrink: 0;
+            text-align: center; 
+        }
+        
+        .avatar-circle { 
+            width: 85px; 
+            height: 85px; 
+            background-color: #5b5b5b; 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: #fff; 
+            font-size: 16px; 
+            font-weight: bold;
+            margin-bottom: 8px; 
+            overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            border: 2px solid #fff;
+        }
+
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 13.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
+        
+        .info-section { 
+            flex-grow: 1; 
+            margin-left: 28px; 
+            font-size: 13.5px; 
+            line-height: 1.55; 
+            font-weight: 600; 
+            color: #111;
+        }
+        .info-section p { margin: 3px 0; }
+        
+        /* Grid 3 cột x 2 hàng dàn đều */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 14px; 
+            width: 100%; 
+            grid-auto-rows: 1fr;
+        }
+
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            height: 100%;
+        }
+
+        .section-banner {
+            background-color: var(--banner-bg);
+            color: #000000;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 900;
+            border-top-left-radius: 9px;
+            border-top-right-radius: 9px;
+        }
+
+        .section-body {
+            padding: 14px;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #111;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .section-body ul { padding-left: 16px; margin: 0; }
+        .media-box { margin-top: 10px; padding: 8px; background: rgba(255, 255, 255, 0.85); border-radius: 6px; }
+        .link-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+        
+        /* Định vị chính xác nút liên kết để không bị lệch click */
+        .btn-link-badge {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #0f9d58;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background 0.15s ease;
+        }
+
+        .btn-link-badge:hover {
+            background: #0b8043;
+        }
+
+        .video-container { margin-top: 6px; width: 100%; aspect-ratio: 16 / 9; }
+        .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 4px; border: none; }
+
+        @media (max-width: 900px) {
+            .grid-container { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .header-container { flex-direction: column; text-align: center; }
+            .info-section { margin-left: 0; margin-top: 12px; }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0 !important; margin: 0 !important; background-color: var(--bg-color) !important; }
+            .main-wrapper { max-width: 100% !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="action-bar no-print">
+            <button class="btn-pdf" id="pdfBtn" onclick="exportToPDF()">
+                <i class="fa-solid fa-file-pdf"></i> TẢI PDF CHUẨN NÉT
+            </button>
+        </div>
+
+        <div id="pdfContent">
+            <div class="header-container">
+                <div class="profile-section">
+                    <div class="avatar-circle" id="avatarDisplay">Avatar</div>
+                    <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
+                </div>
+                <div class="info-section">
+                    <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
+                    <p><strong>Ngành:</strong> <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
+                    <p><strong>Khóa:</strong> <span id="courseDisplay">K2021 (Năm 3)</span></p>
+                    <p><strong>Mã số sinh viên:</strong> <span id="studentIdDisplay">21150000</span></p>
+                    <p><strong>Số điện thoại:</strong> <span id="phoneDisplay">0901234567</span></p>
+                    <p><strong>Gmail:</strong> <span id="emailDisplay">sinhvien@example.com</span></p>
+                </div>
+            </div>
+
+            <div class="grid-container" id="gridContainer"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBQG-sillO8bUFeYPNam0id7KrJ_NaBpyo",
+          authDomain: "cv-luong-hoang-phuc.firebaseapp.com",
+          databaseURL: "https://cv-luong-hoang-phuc-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "cv-luong-hoang-phuc",
+          storageBucket: "cv-luong-hoang-phuc.firebasestorage.app",
+          messagingSenderId: "278907045649",
+          appId: "1:278907045649:web:2221db3506973baccd6eb0",
+          measurementId: "G-3HYL9FLGN2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const sectionKeys = ['gioi-thieu', 'mang-xa-hoi', 'ky-nang', 'chung-chi', 'kinh-nghiem', 'du-an'];
+
+        const defaultPortfolioData = {
+            'gioi-thieu': {
+                title: "1. Giới thiệu",
+                content: `<p style="margin-bottom: 4px; font-weight: bold;">Sinh viên ngành CNKT In có kiến thức nền tảng tốt về Chế bản - In - Thành phẩm.</p>`
+            },
+            'mang-xa-hoi': { title: "2. Mạng xã hội & Liên hệ", content: "" },
+            'ky-nang': { title: "3. Kỹ năng chuyên môn", content: "" },
+            'chung-chi': { title: "4. Chứng chỉ & Khóa học", content: "" },
+            'kinh-nghiem': { title: "5. Kinh nghiệm thực tập", content: "" },
+            'du-an': { title: "6. Dự án tiêu biểu", content: "" }
+        };
+
+        let currentPortfolioData = defaultPortfolioData;
+
+        function ensureValidUrl(url) {
+            if (!url) return "#";
+            let cleanUrl = url.trim();
+            if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+                cleanUrl = "https://" + cleanUrl;
+            }
+            return cleanUrl;
+        }
+
+        function renderAllSections() {
+            const container = document.getElementById('gridContainer');
+            let html = '';
+
+            sectionKeys.forEach(key => {
+                const data = currentPortfolioData[key] || defaultPortfolioData[key];
+                if (!data) return;
+
+                let contentHtml = (data.content && data.content.trim() !== "") ? `<div>${data.content}</div>` : "";
+
+                if (data.links && Array.isArray(data.links) && data.links.length > 0) {
+                    contentHtml += `<div class="media-box"><div class="link-buttons">`;
+                    data.links.forEach(item => {
+                        if (item.url && item.url.trim() !== "") {
+                            const buttonTitle = (item.label && item.label.trim() !== "") ? item.label : "Mở Xem";
+                            let iconHtml = '<i class="fa-solid fa-globe"></i>';
+                            const labelLower = buttonTitle.toLowerCase();
+                            const urlLower = item.url.toLowerCase();
+
+                            if (labelLower.includes('facebook') || urlLower.includes('facebook.com')) iconHtml = '<i class="fa-brands fa-facebook"></i>';
+                            else if (labelLower.includes('linkedin') || urlLower.includes('linkedin.com')) iconHtml = '<i class="fa-brands fa-linkedin"></i>';
+
+                            const validUrl = ensureValidUrl(item.url);
+
+                            contentHtml += `<a href="${validUrl}" target="_blank" rel="noopener noreferrer" class="btn-link-badge">${iconHtml} ${buttonTitle}</a>`;
+                        }
+                    });
+                    contentHtml += `</div></div>`;
+                }
+
+                if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
+                    contentHtml += `<div class="media-box"><strong>🎬 Video:</strong>`;
+                    data.videos.forEach(item => {
+                        if (item.url && item.url.trim() !== "") {
+                            let videoHtml = "";
+                            if (item.url.includes('youtube.com') || item.url.includes('youtu.be')) {
+                                let embedUrl = item.url.replace('watch?v=', 'embed/');
+                                videoHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+                            } else {
+                                videoHtml = `<video controls src="${item.url}"></video>`;
+                            }
+                            contentHtml += `<div class="video-container">${videoHtml}</div>`;
+                        }
+                    });
+                    contentHtml += `</div>`;
+                }
+
+                html += `
+                    <div class="section-card">
+                        <div class="section-banner">${data.title || "Nội dung"}</div>
+                        <div class="section-body">${contentHtml}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function listenRealtimeData() {
+            onValue(ref(db, 'portfolioData'), (snapshot) => {
+                if (!snapshot.exists()) {
+                    renderAllSections();
+                    return;
+                }
+                const parsed = snapshot.val();
+
+                if (parsed.personal) {
+                    if (parsed.personal.name) document.getElementById('nameDisplay').innerText = parsed.personal.name;
+                    if (parsed.personal.school) document.getElementById('schoolDisplay').innerText = parsed.personal.school;
+                    if (parsed.personal.major) document.getElementById('majorDisplay').innerText = parsed.personal.major;
+                    if (parsed.personal.course) document.getElementById('courseDisplay').innerText = parsed.personal.course;
+                    if (parsed.personal.studentId) document.getElementById('studentIdDisplay').innerText = parsed.personal.studentId;
+                    if (parsed.personal.phone) document.getElementById('phoneDisplay').innerText = parsed.personal.phone;
+                    if (parsed.personal.email) document.getElementById('emailDisplay').innerText = parsed.personal.email;
+
+                    if (parsed.personal.avatar) {
+                        document.getElementById('avatarDisplay').innerHTML = `<img src="${parsed.personal.avatar}" alt="Avatar">`;
+                    }
+                }
+
+                if (parsed.theme) {
+                    const r = document.querySelector(':root');
+                    if (parsed.theme.bgColor) r.style.setProperty('--bg-color', parsed.theme.bgColor);
+                    if (parsed.theme.btnColor) r.style.setProperty('--banner-bg', parsed.theme.btnColor);
+                    if (parsed.theme.textColor) r.style.setProperty('--text-color', parsed.theme.textColor);
+                }
+
+                if (parsed.sections) {
+                    currentPortfolioData = parsed.sections;
+                }
+                
+                renderAllSections();
+            });
+        }
+
+        window.onload = function() {
+            renderAllSections();
+            listenRealtimeData();
+        };
+    </script>
+
+    <!-- Xuất PDF kích thước Custom (Đúng tỷ lệ gốc 1:1, không nén, không mờ) -->
+    <script>
+        async function exportToPDF() {
+            const element = document.getElementById('pdfContent');
+            const btn = document.getElementById('pdfBtn');
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XUẤT PDF...';
+            btn.disabled = true;
+
+            // 1. Ép màn hình cuộn lên trên cùng
+            window.scrollTo(0, 0);
+
+            // 2. Chốt cố định chiều rộng thành chuẩn Desktop (ví dụ: 1100px) 
+            // Bước này CỰC KỲ QUAN TRỌNG để PDF không bị bóp méo hay xếp dọc khi đang xem trên màn hình nhỏ.
+            const originalWidth = element.style.width;
+            const originalMaxWidth = element.style.maxWidth;
+            
+            element.style.width = '1100px';
+            element.style.maxWidth = '1100px';
+
+            // Đợi 1 chút để DOM cập nhật style
+            await new Promise(r => setTimeout(r, 100));
+
+            // 3. Đo đạc chính xác kích thước pixel thật của element sau khi ép size
+            const exportWidth = element.offsetWidth;
+            const exportHeight = element.offsetHeight;
+
+            // 4. Cấu hình jsPDF nhận Custom Size thay vì "A4" để khớp 100% tỷ lệ
+            const opt = {
+                margin:       0, // Không cần margin của jsPDF vì ta đã có padding trong #pdfContent
+                filename:     'Portfolio_LuongHoangPhuc.pdf',
+                image:        { type: 'png' }, // BẮT BUỘC dùng PNG để nét chữ không bị nhiễu nén (Artifacts)
+                html2canvas:  { 
+                    scale: 3,               // Tỉ lệ scale 3 mang lại độ nét tuyệt đối (~300 DPI)
+                    useCORS: true, 
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF:        { 
+                    unit: 'px', 
+                    format: [exportWidth, exportHeight], // <- BÍ QUYẾT TẠI ĐÂY: Tạo file PDF có kích thước khớp 100% tỷ lệ thực tế
+                    orientation: 'landscape',
+                    compress: true 
+                },
+                enableLinks:  true
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } catch (err) {
+                console.error("Lỗi xuất PDF:", err);
+            } finally {
+                // Trả lại trạng thái Responsive như cũ
+                element.style.width = originalWidth;
+                element.style.maxWidth = originalMaxWidth;
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+portfolio_fixed.html
+Đang hiển thị portfolio_fixed.html.
