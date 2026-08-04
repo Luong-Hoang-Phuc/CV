@@ -6,7 +6,7 @@
     <title>Portfolio Số - Công Nghệ Kỹ Thuật In</title>
     <!-- Thư viện Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Thư viện html2pdf.js xuất PDF giữ nguyên link -->
+    <!-- Thư viện html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -17,6 +17,10 @@
             --text-color: #000000;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body { 
             background-color: var(--bg-color); 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -24,23 +28,35 @@
             padding: 20px; 
             color: var(--text-color); 
             transition: background-color 0.3s;
+            /* Căn giữa dọc màn hình để thu gọn khoảng xanh thừa */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Thanh công cụ thao tác (Nút Tải PDF) */
-        .action-bar {
+        /* Khối bao bọc toàn bộ nội dung */
+        .main-wrapper {
+            width: 100%;
             max-width: 1100px;
-            margin: 0 auto 20px auto;
+            margin: 0 auto;
+        }
+
+        /* Thanh thao tác chứa nút tải PDF */
+        .action-bar {
+            width: 100%;
+            margin-bottom: 15px;
             display: flex;
             justify-content: flex-end;
-            gap: 12px;
         }
 
         .btn-pdf {
             background-color: #ff4757;
             color: #fff;
             border: none;
-            padding: 12px 24px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 14px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
@@ -60,62 +76,62 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            max-width: 1100px; 
-            margin: 0 auto 25px auto; 
+            width: 100%; 
+            margin-bottom: 20px; 
             background: rgba(255, 255, 255, 0.95); 
             backdrop-filter: blur(12px);
-            padding: 25px 35px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 20px 30px; 
+            border-radius: 18px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        .profile-section { display: flex; flex-direction: column; align-items: center; width: 200px; text-align: center; }
+        .profile-section { display: flex; flex-direction: column; align-items: center; width: 180px; text-align: center; }
         
         .avatar-circle { 
-            width: 130px; 
-            height: 130px; 
+            width: 110px; 
+            height: 110px; 
             background-color: #5b5b5b; 
             border-radius: 50%; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             color: #fff; 
-            font-size: 24px; 
+            font-size: 22px; 
             font-weight: bold;
-            margin-bottom: 10px; 
+            margin-bottom: 8px; 
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             border: 3px solid #fff;
         }
 
         .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-name { font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #000; }
+        .profile-name { font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
         
         .info-section { 
             flex-grow: 1; 
-            margin-left: 30px; 
-            font-size: 15px; 
-            line-height: 1.7; 
+            margin-left: 25px; 
+            font-size: 14px; 
+            line-height: 1.6; 
             font-weight: 600; 
             color: #111;
             word-break: break-word;
         }
-        .info-section p { margin: 4px 0; }
+        .info-section p { margin: 3px 0; }
         
+        /* Grid 3 cột x 2 hàng dàn đều 6 card */
         .grid-container { 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 20px; 
-            max-width: 1100px; 
-            margin: 0 auto; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px; 
+            width: 100%; 
         }
 
         .section-card {
             background-color: var(--card-bg);
-            border-radius: 18px;
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
             display: flex;
             flex-direction: column;
             border: 1px solid rgba(255, 255, 255, 0.4);
@@ -124,39 +140,61 @@
         .section-banner {
             background-color: var(--banner-bg);
             color: #000000;
-            padding: 12px 20px;
-            font-size: 18px;
+            padding: 10px 16px;
+            font-size: 16px;
             font-weight: 900;
-            border-top-left-radius: 18px;
-            border-top-right-radius: 18px;
+            border-top-left-radius: 14px;
+            border-top-right-radius: 14px;
         }
 
         .section-body {
-            padding: 18px;
-            font-size: 14px;
-            line-height: 1.6;
+            padding: 14px;
+            font-size: 13px;
+            line-height: 1.5;
             color: #111;
             flex-grow: 1;
         }
 
-        .section-body ul { padding-left: 18px; margin: 0; }
-        .media-box { margin-top: 10px; padding: 10px; background: rgba(255, 255, 255, 0.7); border-radius: 10px; }
-        .link-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .section-body ul { padding-left: 16px; margin: 0; }
+        .media-box { margin-top: 8px; padding: 8px; background: rgba(255, 255, 255, 0.7); border-radius: 8px; }
+        .link-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+        
+        /* Định dạng nút liên kết đảm bảo bấm chuẩn 100% */
         .btn-link-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 14px;
+            padding: 6px 12px;
             background: #0f9d58;
-            color: #ffffff;
-            text-decoration: none;
+            color: #ffffff !important;
+            text-decoration: none !important;
             border-radius: 6px;
             font-weight: bold;
             font-size: 13px;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+            transition: all 0.15s ease;
+        }
+
+        .btn-link-badge:hover {
+            background: #0b8043;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .video-container { margin-top: 8px; width: 100%; aspect-ratio: 16 / 9; }
         .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 6px; border: none; }
+
+        @media (max-width: 900px) {
+            .grid-container { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .header-container { flex-direction: column; text-align: center; }
+            .info-section { margin-left: 0; margin-top: 15px; }
+        }
 
         /* ==========================================
            CẤU HÌNH IN / XUẤT PDF CHUẨN 1 TRANG NGANG
@@ -173,76 +211,67 @@
                 print-color-adjust: exact !important;
                 padding: 0 !important;
                 margin: 0 !important;
-                zoom: 67%; /* Thu nhỏ tổng thể vừa đúng 1 trang A4 nằm ngang */
+                display: block !important;
+                zoom: 72%;
             }
 
             .no-print {
                 display: none !important;
             }
 
-            .header-container {
-                margin-bottom: 12px !important;
-                padding: 15px 20px !important;
-                border-radius: 14px !important;
+            .main-wrapper {
+                max-width: 100% !important;
             }
 
-            /* Chuyển grid thành 3 cột x 2 hàng để dàn đều 6 card trong 1 trang ngang */
+            .header-container {
+                margin-bottom: 10px !important;
+                padding: 12px 18px !important;
+            }
+
             .grid-container {
                 grid-template-columns: repeat(3, 1fr) !important;
-                gap: 12px !important;
+                gap: 10px !important;
             }
 
             .section-card {
-                border-radius: 12px !important;
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
 
-            .section-banner {
-                padding: 8px 12px !important;
-                font-size: 15px !important;
-            }
-
-            .section-body {
-                padding: 10px !important;
-                font-size: 12px !important;
-                line-height: 1.4 !important;
-            }
-
-            /* Đảm bảo đường liên kết vẫn giữ thuộc tính clickable */
             a {
                 text-decoration: none !important;
-                color: inherit !important;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Thanh thao tác chứa nút tải PDF -->
-    <div class="action-bar no-print">
-        <button class="btn-pdf" onclick="exportToPDF()">
-            <i class="fa-solid fa-file-pdf"></i> TẢI PDF (1 TRANG NGANG)
-        </button>
-    </div>
-
-    <div id="pdfContent">
-        <div class="header-container">
-            <div class="profile-section">
-                <div class="avatar-circle" id="avatarDisplay">Avatar</div>
-                <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
-            </div>
-            <div class="info-section">
-                <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
-                <p><strong>Ngành:</strong> <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
-                <p><strong>Khóa:</strong> <span id="courseDisplay">K2021 (Năm 3)</span></p>
-                <p><strong>Mã số sinh viên:</strong> <span id="studentIdDisplay">21150000</span></p>
-                <p><strong>Số điện thoại:</strong> <span id="phoneDisplay">0901234567</span></p>
-                <p><strong>Gmail:</strong> <span id="emailDisplay">sinhvien@example.com</span></p>
-            </div>
+    <div class="main-wrapper">
+        <!-- Thanh thao tác chứa nút tải PDF -->
+        <div class="action-bar no-print">
+            <button class="btn-pdf" onclick="exportToPDF()">
+                <i class="fa-solid fa-file-pdf"></i> TẢI PDF (1 TRANG NGANG)
+            </button>
         </div>
 
-        <div class="grid-container" id="gridContainer"></div>
+        <div id="pdfContent">
+            <div class="header-container">
+                <div class="profile-section">
+                    <div class="avatar-circle" id="avatarDisplay">Avatar</div>
+                    <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
+                </div>
+                <div class="info-section">
+                    <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
+                    <p><strong>Ngành:</strong> <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
+                    <p><strong>Khóa:</strong> <span id="courseDisplay">K2021 (Năm 3)</span></p>
+                    <p><strong>Mã số sinh viên:</strong> <span id="studentIdDisplay">21150000</span></p>
+                    <p><strong>Số điện thoại:</strong> <span id="phoneDisplay">0901234567</span></p>
+                    <p><strong>Gmail:</strong> <span id="emailDisplay">sinhvien@example.com</span></p>
+                </div>
+            </div>
+
+            <div class="grid-container" id="gridContainer"></div>
+        </div>
     </div>
 
     <script type="module">
@@ -268,31 +297,41 @@
         const defaultPortfolioData = {
             'gioi-thieu': {
                 title: "1. Giới thiệu",
-                content: `<p style="margin-bottom: 8px; font-weight: bold;">Sinh viên năm 3 - Chuyên ngành Công nghệ Kỹ thuật In</p><ul><li><strong>Kiến thức:</strong> Offset, Flexo, KTS, Chế bản & Thành phẩm.</li><li><strong>Kinh nghiệm:</strong> 2 kỳ thực tập chuyên ngành.</li></ul>`
+                content: `<p style="margin-bottom: 6px; font-weight: bold;">Sinh viên ngành CNKT In có kiến thức nền tảng tốt về Chế bản - In - Thành phẩm.</p>`
             },
             'mang-xa-hoi': {
                 title: "2. Mạng xã hội & Liên hệ",
-                content: "<ul><li><strong>LinkedIn:</strong> linkedin.com/in/tensinhvien</li><li><strong>Email:</strong> email@example.com</li><li><strong>Khu vực:</strong> TP. Hồ Chí Minh</li></ul>"
+                content: ""
             },
             'ky-nang': {
                 title: "3. Kỹ năng chuyên môn",
-                content: "<ul><li><strong>Công nghệ:</strong> Offset, Flexo, In KTS.</li><li><strong>Phần mềm:</strong> Adobe CC, Esko, Pitstop, Prinect.</li><li><strong>Tiêu chuẩn:</strong> ISO 12647, G7.</li></ul>"
+                content: ""
             },
             'chung-chi': {
                 title: "4. Chứng chỉ & Khóa học",
-                content: "<ul><li>Chứng chỉ Quản lý Màu G7 (Basic).</li><li>An toàn Lao động & Môi trường.</li><li>Xử lý file Preflight PDF/X.</li></ul>"
+                content: ""
             },
             'kinh-nghiem': {
                 title: "5. Kinh nghiệm thực tập",
-                content: "<strong>Công ty Bao bì X</strong><br>Vị trí: QC & Quản lý màu.<br>Kiểm tra bài in, đo đạc thông số màu và lập báo cáo."
+                content: ""
             },
             'du-an': {
-                title: "6. Dự án tiêu biểu (Mô hình CAR)",
-                content: "<strong>Dự án: Ổn định màu hộp giấy Offset</strong><ul><li><strong>C:</strong> Màu lệch giữa các ca in.</li><li><strong>A:</strong> Hiệu chỉnh TVI chuẩn G7.</li><li><strong>R:</strong> Giảm Delta E từ 3.4 xuống 1.7.</li></ul>"
+                title: "6. Dự án tiêu biểu",
+                content: ""
             }
         };
 
         let currentPortfolioData = defaultPortfolioData;
+
+        // Hàm hỗ trợ tự động bổ sung https:// nếu liên kết thiếu protocol
+        function ensureValidUrl(url) {
+            if (!url) return "#";
+            let cleanUrl = url.trim();
+            if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+                cleanUrl = "https://" + cleanUrl;
+            }
+            return cleanUrl;
+        }
 
         function renderAllSections() {
             const container = document.getElementById('gridContainer');
@@ -305,10 +344,10 @@
                 let contentHtml = (data.content && data.content.trim() !== "") ? `<div>${data.content}</div>` : "";
 
                 if (data.links && Array.isArray(data.links) && data.links.length > 0) {
-                    contentHtml += `<div class="media-box"><strong>🔗 </strong><div class="link-buttons">`;
+                    contentHtml += `<div class="media-box"><div class="link-buttons">`;
                     data.links.forEach(item => {
                         if (item.url && item.url.trim() !== "") {
-                            const buttonTitle = (item.label && item.label.trim() !== "") ? item.label : "Mở Xem Tài Liệu";
+                            const buttonTitle = (item.label && item.label.trim() !== "") ? item.label : "Mở Xem";
                             let iconHtml = '<i class="fa-solid fa-globe"></i>';
                             const labelLower = buttonTitle.toLowerCase();
                             const urlLower = item.url.toLowerCase();
@@ -316,7 +355,9 @@
                             if (labelLower.includes('facebook') || urlLower.includes('facebook.com')) iconHtml = '<i class="fa-brands fa-facebook"></i>';
                             else if (labelLower.includes('linkedin') || urlLower.includes('linkedin.com')) iconHtml = '<i class="fa-brands fa-linkedin"></i>';
 
-                            contentHtml += `<a href="${item.url}" target="_blank" class="btn-link-badge">${iconHtml} ${buttonTitle}</a>`;
+                            const validUrl = ensureValidUrl(item.url);
+
+                            contentHtml += `<a href="${validUrl}" target="_blank" rel="noopener noreferrer" class="btn-link-badge">${iconHtml} ${buttonTitle}</a>`;
                         }
                     });
                     contentHtml += `</div></div>`;
@@ -393,7 +434,6 @@
         };
     </script>
 
-    <!-- Kịch bản xuất PDF bằng Trình In Hệ Thống (Màu sắc nét, Vector PDF, Link sống 100%) -->
     <script>
         function exportToPDF() {
             window.print();
