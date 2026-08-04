@@ -79,6 +79,9 @@
             width: 100%;
             box-sizing: border-box;
             position: relative;
+            /* Khóa ngắt trang để tránh tạo trang 2 trắng */
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .header-container { 
@@ -93,7 +96,6 @@
             border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        /* FIX LỖI 1: Tăng kích thước vùng chứa tên và chống nhảy hàng */
         .profile-section { 
             display: flex; 
             flex-direction: column; 
@@ -128,7 +130,6 @@
             display: block;
         }
 
-        /* FIX LỖI 1: Ép họ tên luôn nằm trên 1 hàng */
         .profile-name { 
             font-size: 13.5px; 
             font-weight: 900; 
@@ -382,7 +383,8 @@
                     if (parsed.personal.email) document.getElementById('emailDisplay').innerText = parsed.personal.email;
 
                     if (parsed.personal.avatar) {
-                        document.getElementById('avatarDisplay').innerHTML = `<img src="${parsed.personal.avatar}" alt="Avatar">`;
+                        // Thêm crossorigin="anonymous" để html2canvas nhận diện quyền ảnh
+                        document.getElementById('avatarDisplay').innerHTML = `<img src="${parsed.personal.avatar}" alt="Avatar" crossorigin="anonymous">`;
                     }
                 }
 
@@ -407,8 +409,39 @@
         };
     </script>
 
-    <!-- FIX LỖI 2: Xuất PDF nét cực cao (~400DPI), giữ nguyên tỷ lệ hình ảnh -->
+    <!-- XUẤT PDF CHỐNG MẤT ẢNH VÀ CHỐNG TRANG TRẮNG DƯ THỪA -->
     <script>
+        async function convertImagesToBase64(element) {
+            const imgs = element.querySelectorAll('img');
+            for (let img of imgs) {
+                if (img.src && !img.src.startsWith('data:')) {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const tempImg = new Image();
+                        tempImg.crossOrigin = 'anonymous';
+                        await new Promise((resolve) => {
+                            tempImg.onload = () => {
+                                canvas.width = tempImg.naturalWidth || tempImg.width;
+                                canvas.height = tempImg.naturalHeight || tempImg.height;
+                                ctx.drawImage(tempImg, 0, 0);
+                                try {
+                                    img.src = canvas.toDataURL('image/png');
+                                } catch (e) {
+                                    console.warn('Không thể tạo Base64 canvas:', e);
+                                }
+                                resolve();
+                            };
+                            tempImg.onerror = () => resolve();
+                            tempImg.src = img.src;
+                        });
+                    } catch (e) {
+                        console.warn('Lỗi chuyển hình sang Base64:', e);
+                    }
+                }
+            }
+        }
+
         async function exportToPDF() {
             const element = document.getElementById('pdfContent');
             const btn = document.getElementById('pdfBtn');
@@ -419,6 +452,9 @@
 
             window.scrollTo(0, 0);
 
+            // Chuyển ảnh Firebase sang Base64 trực tiếp để html2canvas không bao giờ bị trôi/mất ảnh
+            await convertImagesToBase64(element);
+
             // Cố định kích thước chuẩn Desktop cho canvas
             const originalWidth = element.style.width;
             const originalMaxWidth = element.style.maxWidth;
@@ -426,7 +462,7 @@
             element.style.width = '1100px';
             element.style.maxWidth = '1100px';
 
-            await new Promise(r => setTimeout(r, 150));
+            await new Promise(r => setTimeout(r, 200));
 
             const exportWidth = element.offsetWidth;
             const exportHeight = element.offsetHeight;
@@ -436,12 +472,13 @@
                 filename:     'Portfolio_LuongHoangPhuc.pdf',
                 image:        { type: 'png' }, 
                 html2canvas:  { 
-                    scale: 4,               // Đẩy lên scale 4 giúp ảnh và chữ sắc nét tuyệt đối
+                    scale: 3.5,
                     useCORS: true, 
+                    allowTaint: true,
                     logging: false,
                     scrollX: 0,
                     scrollY: 0,
-                    windowWidth: 1100      // Ép html2canvas nhận diện chiều rộng màn hình chuẩn 1100px
+                    windowWidth: 1100
                 },
                 jsPDF:        { 
                     unit: 'px', 
@@ -449,7 +486,7 @@
                     orientation: 'landscape',
                     compress: true 
                 },
-                enableLinks:  true
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
             try {
