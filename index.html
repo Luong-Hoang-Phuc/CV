@@ -17,7 +17,7 @@
             --text-color: #000000;
         }
 
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
         }
 
@@ -25,20 +25,21 @@
             background-color: var(--bg-color); 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
             margin: 0; 
-            padding: 15px; 
+            padding: 20px 10px; 
             color: var(--text-color); 
-            transition: background-color 0.3s;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         .main-wrapper {
             width: 100%;
-            max-width: 1050px;
+            max-width: 1020px;
             margin: 0 auto;
         }
 
@@ -53,15 +54,15 @@
             background-color: #ff4757;
             color: #fff;
             border: none;
-            padding: 8px 16px;
+            padding: 9px 18px;
             font-size: 13px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
             transition: all 0.2s ease;
         }
 
@@ -70,38 +71,46 @@
             transform: translateY(-1px);
         }
 
-        /* Khung nội dung PDF */
+        /* Khung nội dung PDF cố định tỉ lệ A4 Ngang */
         #pdfContent {
             background-color: var(--bg-color);
-            padding: 10px;
+            padding: 16px;
             border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .header-container { 
             display: flex; 
-            justify-content: space-between; 
             align-items: center; 
             width: 100%; 
-            margin-bottom: 12px; 
-            background: rgba(255, 255, 255, 0.96); 
-            padding: 14px 20px; 
+            margin-bottom: 14px; 
+            background: rgba(255, 255, 255, 0.98); 
+            padding: 14px 22px; 
             border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        .profile-section { display: flex; flex-direction: column; align-items: center; width: 150px; text-align: center; }
+        .profile-section { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 140px; 
+            flex-shrink: 0;
+            text-align: center; 
+        }
         
         .avatar-circle { 
-            width: 85px; 
-            height: 85px; 
+            width: 80px; 
+            height: 80px; 
             background-color: #5b5b5b; 
             border-radius: 50%; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             color: #fff; 
-            font-size: 18px; 
+            font-size: 16px; 
             font-weight: bold;
             margin-bottom: 6px; 
             overflow: hidden;
@@ -110,24 +119,23 @@
         }
 
         .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-name { font-size: 13.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
+        .profile-name { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #000; }
         
         .info-section { 
             flex-grow: 1; 
-            margin-left: 20px; 
-            font-size: 12.5px; 
-            line-height: 1.45; 
+            margin-left: 24px; 
+            font-size: 13px; 
+            line-height: 1.5; 
             font-weight: 600; 
             color: #111;
-            word-break: break-word;
         }
-        .info-section p { margin: 2px 0; }
+        .info-section p { margin: 3px 0; }
         
-        /* Grid 3 cột x 2 hàng - Đảm bảo các hàng cao bằng nhau */
+        /* Grid 3 cột x 2 hàng dàn đều */
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; 
+            gap: 12px; 
             width: 100%; 
             grid-auto-rows: 1fr;
         }
@@ -139,24 +147,24 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             height: 100%;
         }
 
         .section-banner {
             background-color: var(--banner-bg);
             color: #000000;
-            padding: 7px 12px;
+            padding: 8px 12px;
             font-size: 13.5px;
             font-weight: 900;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            border-top-left-radius: 9px;
+            border-top-right-radius: 9px;
         }
 
         .section-body {
-            padding: 10px;
-            font-size: 11.5px;
-            line-height: 1.4;
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.45;
             color: #111;
             flex-grow: 1;
             display: flex;
@@ -164,22 +172,21 @@
             justify-content: space-between;
         }
 
-        .section-body ul { padding-left: 14px; margin: 0; }
-        .media-box { margin-top: 6px; padding: 5px; background: rgba(255, 255, 255, 0.75); border-radius: 6px; }
-        .link-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+        .section-body ul { padding-left: 16px; margin: 0; }
+        .media-box { margin-top: 8px; padding: 6px; background: rgba(255, 255, 255, 0.85); border-radius: 6px; }
+        .link-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
         
         .btn-link-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
+            gap: 5px;
+            padding: 5px 10px;
             background: #0f9d58;
             color: #ffffff !important;
             text-decoration: none !important;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 11px;
-            cursor: pointer;
+            font-size: 11.5px;
             transition: all 0.15s ease;
         }
 
@@ -197,7 +204,7 @@
         @media (max-width: 600px) {
             .grid-container { grid-template-columns: 1fr; }
             .header-container { flex-direction: column; text-align: center; }
-            .info-section { margin-left: 0; margin-top: 10px; }
+            .info-section { margin-left: 0; margin-top: 12px; }
         }
 
         @media print {
@@ -380,7 +387,7 @@
         };
     </script>
 
-    <!-- Kịch bản xuất PDF chất lượng cao, không vỡ nét -->
+    <!-- Kịch bản xuất PDF chất lượng cao, không vỡ nét & không mất góc -->
     <script>
         function exportToPDF() {
             const element = document.getElementById('pdfContent');
@@ -391,17 +398,19 @@
             btn.disabled = true;
 
             const opt = {
-                margin:       [4, 4, 4, 4],
+                margin:       [5, 5, 5, 5],
                 filename:     'Portfolio_LuongHoangPhuc.pdf',
-                image:        { type: 'jpeg', quality: 1.0 },
+                image:        { type: 'png' }, // PNG giữ nét tuyệt đối, không nén mờ như JPEG
                 html2canvas:  { 
-                    scale: 3,             // Tăng độ nét cực cao chống bể hình/chữ
+                    scale: 3,                // Độ phân giải siêu nét (300 DPI)
                     useCORS: true, 
                     logging: false,
                     letterRendering: true,
-                    windowWidth: 1050     // Cố định độ rộng viewport chụp ảnh
+                    scrollX: 0,              // Cố định điểm chụp từ sát góc trái
+                    scrollY: 0,              // Cố định điểm chụp từ sát góc trên
+                    windowWidth: 1020        // Cố định viewport canvas khớp hoàn toàn với container
                 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape', compress: true },
                 enableLinks:  true
             };
 
