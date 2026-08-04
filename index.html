@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio Số - Công Nghệ Kỹ Thuật In</title>
+    <!-- Thêm thư viện Font Awesome cho các Icon Facebook, LinkedIn,... -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --bg-color: #eaff00;
@@ -117,6 +119,9 @@
             font-size: 15px;
             transition: all 0.2s ease;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .btn-link-badge i {
+            font-size: 18px;
         }
         .btn-link-badge:hover {
             background: #0b8043;
@@ -277,8 +282,20 @@
                     `;
                     linksList.forEach(item => {
                         if (item.url && item.url.trim() !== "") {
-                            const buttonTitle = (item.label && item.label.trim() !== "") ? item.label : "🔗 Mở Xem Tài Liệu";
-                            htmlContent += `<a href="${item.url}" target="_blank" class="btn-link-badge">🌐 ${buttonTitle}</a>`;
+                            const buttonTitle = (item.label && item.label.trim() !== "") ? item.label : "Mở Xem Tài Liệu";
+                            
+                            // Tự động kiểm tra và chọn Icon phù hợp
+                            let iconHtml = '<i class="fa-solid fa-globe"></i>'; // Icon mặc định
+                            const labelLower = buttonTitle.toLowerCase();
+                            const urlLower = item.url.toLowerCase();
+
+                            if (labelLower.includes('facebook') || urlLower.includes('facebook.com') || urlLower.includes('fb.com')) {
+                                iconHtml = '<i class="fa-brands fa-facebook"></i>';
+                            } else if (labelLower.includes('linkedin') || urlLower.includes('linkedin.com')) {
+                                iconHtml = '<i class="fa-brands fa-linkedin"></i>';
+                            }
+
+                            htmlContent += `<a href="${item.url}" target="_blank" class="btn-link-badge">${iconHtml} ${buttonTitle}</a>`;
                         }
                     });
                     htmlContent += `</div></div>`;
