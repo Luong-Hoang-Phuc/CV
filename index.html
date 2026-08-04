@@ -60,7 +60,16 @@
         .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
         .profile-name { font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #000; }
         
-        .info-section { flex-grow: 1; margin-left: 40px; font-size: 17px; line-height: 1.8; font-weight: 600; color: #111; }
+        .info-section { 
+            flex-grow: 1; 
+            margin-left: 40px; 
+            font-size: 17px; 
+            line-height: 1.8; 
+            font-weight: 600; 
+            color: #111;
+            word-break: break-word; /* Tự động ngắt dòng thông minh cho email/chuỗi dài */
+            overflow-wrap: anywhere;
+        }
         .info-section p { margin: 6px 0; }
         
         /* Grid hiển thị các Card mở */
@@ -135,10 +144,24 @@
         .video-container { margin-top: 12px; width: 100%; aspect-ratio: 16 / 9; }
         .video-container iframe, .video-container video { width: 100%; height: 100%; border-radius: 8px; border: none; }
 
+        /* Tối ưu responsive màn hình tablet và mobile */
         @media (max-width: 900px) {
-            .header-container { flex-direction: column; text-align: center; padding: 25px; }
-            .info-section { margin: 20px 0; text-align: left; }
+            .header-container { flex-direction: column; text-align: center; padding: 30px 20px; }
+            .profile-section { width: 100%; }
+            .info-section { margin: 20px 0 0 0; text-align: left; width: 100%; }
             .grid-container { grid-template-columns: 1fr; }
+        }
+
+        /* Cấu hình chuẩn riêng cho Điện thoại nhỏ (Mobile Fix) */
+        @media (max-width: 600px) {
+            body { padding: 15px 10px; }
+            .header-container { padding: 25px 18px; border-radius: 20px; margin-bottom: 25px; }
+            .avatar-circle { width: 130px; height: 130px; }
+            .profile-name { font-size: 18px; }
+            .info-section { font-size: 15px; line-height: 1.6; }
+            .info-section p { margin: 8px 0; }
+            .section-banner { font-size: 19px; padding: 14px 18px; }
+            .section-body { padding: 18px; font-size: 15px; }
         }
     </style>
 </head>
@@ -150,12 +173,12 @@
             <div class="profile-name" id="nameDisplay">HỌ VÀ TÊN</div>
         </div>
         <div class="info-section">
-            <p>Trường: <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
-            <p>Ngành: <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
-            <p>Khóa: <span id="courseDisplay">K2021 (Năm 3)</span></p>
-            <p>Mã số sinh viên: <span id="studentIdDisplay">21150000</span></p>
-            <p>Số điện thoại: <span id="phoneDisplay">0901234567</span></p>
-            <p>Gmail: <span id="emailDisplay">sinhvien@example.com</span></p>
+            <p><strong>Trường:</strong> <span id="schoolDisplay">ĐH Sư Phạm Kỹ Thuật TP.HCM</span></p>
+            <p><strong>Ngành:</strong> <span id="majorDisplay">Công nghệ Kỹ thuật In</span></p>
+            <p><strong>Khóa:</strong> <span id="courseDisplay">K2021 (Năm 3)</span></p>
+            <p><strong>Mã số sinh viên:</strong> <span id="studentIdDisplay">21150000</span></p>
+            <p><strong>Số điện thoại:</strong> <span id="phoneDisplay">0901234567</span></p>
+            <p><strong>Gmail:</strong> <span id="emailDisplay">sinhvien@example.com</span></p>
         </div>
     </div>
 
@@ -228,11 +251,10 @@
 
                 let contentHtml = (data.content && data.content.trim() !== "") ? `<div>${data.content}</div>` : "";
 
-                // Liên kết đính kèm
                 if (data.links && Array.isArray(data.links) && data.links.length > 0) {
                     contentHtml += `
                         <div class="media-box">
-                            <strong>🔗</strong>
+                            <strong>🔗 Đính kèm & Liên kết kết nối:</strong>
                             <div class="link-buttons">
                     `;
                     data.links.forEach(item => {
@@ -254,7 +276,6 @@
                     contentHtml += `</div></div>`;
                 }
 
-                // Video đính kèm
                 if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
                     contentHtml += `<div class="media-box"><strong>🎬 Video Minh Họa:</strong>`;
                     data.videos.forEach(item => {
@@ -266,7 +287,7 @@
                             } else {
                                 videoHtml = `<video controls src="${item.url}"></video>`;
                             }
-                            htmlContent += `<div class="video-container">${videoHtml}</div>`;
+                            contentHtml += `<div class="video-container">${videoHtml}</div>`;
                         }
                     });
                     contentHtml += `</div>`;
